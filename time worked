@@ -1,0 +1,81 @@
+01/02/2017
+9:43-9:50	try use linux readimx - remove internal addpaths - get invalid mex file error
+11:10 - 12:30	try to fix readimx problem in linux. Start working on being able to load old masksing file and being able to edit it
+		found error in display operations where old masks are visible if cropping
+		found a way to edit the masks loaded from a GUI output file (created function MHData_edit_masks)-
+15:24 - 15:54	implementing method to edit old masks for DIC data & DVC data
+17:00 - 18:11	continue implementing method to edit old masks for DVC
+		slider does not work for old mask files for DVC data
+		for DVC opens a new instance of GUI that cant use any of its callbacks/menu drop downs
+
+02/02/2017	
+15:33 - 18:02	Continue to work on getting DVC data to work when importing created mask files
+		Determined issue - roi is not being passed from the callback that loads the old mask file to the other callbacks
+		Fixed issue of saving the slider and its textbox in procdata - was causing DVC data loaded from an old mask file to create a new image
+		DVC now importing correctly but slider has more increments than there are rows/columns
+		fixed slider increment issue using SliderStep option
+		Ensure that the slider can only have whole number values by flooring the value input and setting that as the new slider value
+
+03/02/2017
+07:56 - 11:23	Start writing down what tasks should be completed and which features should be added
+			getting readimx.mexa64 file to work in linux - not working yet 30 min
+			add a string box under the slider for DVC data that shows which column is being viewed out of the number of columbs that exist
+			fix MHGraph_Zheight.. so that they update the textboxes under the slider
+			add tooltipstrings to these textboxes and align the textboxes
+			update textboxes when change height using gui menu instead of slider
+			5 min Lucas showed me how to use the 3D printer
+			10 min break
+			add function MHData_close_field to output a file containing the processed displacement fields
+			make the load mask function more robust so an error does not result if a file is not selected
+			do the same for all the data loading functions
+
+05/02/2017
+10:41 - 13:50	Figuring out how to use hatchfill2 to hatch rectangles and polygons
+			Use contour with hatchfill2 to hatch data in function MHOptions_hatch
+			Figure out how to apply hatch but still display displacement data as it would usually look (contourf changes colours of displacement data) - working for DIC
+
+14:37 - 15:41	Change MHOptions_hatch to work with DVC data
+				found out matrices displayed for DVC data must be rotated when not on the PosX and PosY orientation
+
+06/02/2017
+use todays save copy if want before switch Z on axes
+11:40 - 13:00	fixing matrix not displayed on correct axes
+13:50 - 14:10	change posZ from y axis to x axis since data is in that form
+
+31/03/2017
+8:00-13:00		adjust code so that it outputs variables consisten with matts format. put subfunctions in a folder.
+				create an example code to show how to create masks without using gui.
+
+28/04/2017
+7:00-8:30		add function 'output_other_fields' to field_format so that other fields such as the correlation coefficient can
+				be output to the final structure variable obtained from field_format.
+
+
+
+05/08/2017
+12:00 - 13:30	Find issues with displaying DVC data
+				Apply squeeze when reducing the 3D matrices to 2D matrices in order to display DVC data
+				Add "set(gca,'YDir','normal');" after "imagesc" in update_figure function so that y axis is the correct direction
+				Fix update_fiugre to display DVC data. Correct orientation now but axes of data are wrong
+3:40 - 4:20		Create a text file of all the functions and what they do - and think how to change the way the DVC data is stored
+				in the GUI so that it is possible to display the data using the correct data on the axes.
+
+07/08/2017
+10:40 - 11:40	Changing the imported DVC data format - create "Correct_DVC_data" and edit "update_figure" & "MHData_type_DVC"
+
+
+
+rot90(fliplr(a),1)
+
+
+impoint done twice in update_figure
+
+issue with hatching - number of indices for DVC data does not match - data matrices displayed incorrectly for dvc data - must be rotated
+
+Becker (22/03/2017):
+comment each section
+get working as soon as possible
+all supporting functions in a folder (link to matlab so it knows where it is)
+seperate supporting functions into own scripts
+make example so people understand how to use code (and example how to do through script only)
+create example code to illustrate how to use backend and create masks manually and publish it. can put pictures into publishing

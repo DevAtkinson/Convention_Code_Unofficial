@@ -1,0 +1,6 @@
+v1_0
+First working code made available for use.
+
+v1_1
+Add function 'output_other_fields' to output all the possible data contained in the .vc7 files.
+Add functionality in run_this_to_add_current_folder_to_matlabs_search_path for Mac computers

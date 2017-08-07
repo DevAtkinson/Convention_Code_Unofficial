@@ -1,0 +1,719 @@
+function display_operations(procdata_in)
+	% this function displays the data and masks associated with a GUI output file (.mat) or variables (procdata).
+	if ischar(procdata_in) %if procdata_in is a file
+		warning off
+		load(procdata_in)
+		close all
+		warning on
+	else
+		procdata=procdata_in;
+	end
+	scrsz = get(0,'ScreenSize');
+	if procdata.data_type=='DIC'
+		handles.fig = figure('MenuBar','None','Position',[(scrsz(3)-300)/2 (scrsz(4)-600)/2 800 600]);
+		set(handles.fig, 'Name', 'Dipslay operations');
+		axes1=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[70,70,450,450]);
+
+		box(axes1,'on');
+		axis(axes1,'tight');
+		axis(axes1,'equal');
+		set(axes1,'DataAspectRatio',[1 1 1],'Layer','top');
+		Z = peaks(51);
+		imghandle = imagesc(Z,'Parent',axes1);
+
+		[field,procdata]=import_data(procdata,procdata.filename,procdata.pathname);
+		field_save=field;
+		for i=1:procdata.current
+			string{i}=sprintf('%d %s %s %s', i, procdata.op(i).act,procdata.op(i).shape,procdata.op(i).clude);
+		end
+		lb=uicontrol('Style','listbox','Max',5,'Min',0,'string',string,'Position',[550,15,200,450],'Callback',@update_fig);
+		uicontrol('Style','text','string','Use ctrl to select multiple operations:','Position',[550,470,200,20]);
+		ch_mask=uicontrol('Style','checkbox','String','Display masks','Position',[550,500,200,20],'Callback',@update_fig);
+		ch_data=uicontrol('Style','checkbox','string','Display processed data','Position',[550,530,200,20],'Callback',@update_fig);
+	elseif procdata.data_type=='DVC'
+		handles.fig = figure('MenuBar','None','Position',[(scrsz(3)-300)/2 (scrsz(4)-600)/2 800 800]);
+		set(handles.fig, 'Name', 'Dipslay operations');
+		axes1=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[70,70,300,300]);
+		axes2=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[70,440,300,300]);
+		axes3=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[440,440,300,300]);
+		[field,procdata]=import_data(procdata,procdata.filename,procdata.pathname);
+		field_save=field;
+		for i=1:procdata.current
+			string{i}=sprintf('%d %s %s %s', i, procdata.op(i).act,procdata.op(i).shape,procdata.op(i).clude);
+		end
+		lb=uicontrol('Style','listbox','Max',5,'Min',0,'string',string,'Position',[550,15,200,260],'Callback',@update_fig);
+		uicontrol('Style','text','string','Use ctrl to select multiple operations:','Position',[550,300,200,20]);
+		ch_mask=uicontrol('Style','checkbox','String','Display masks','Position',[550,330,200,20],'Callback',@update_fig);
+		ch_data=uicontrol('Style','checkbox','string','Display processed data','Position',[550,350,200,20],'Callback',@update_fig);
+	end
+	% this function updates the figures to display the data with the selected options
+	function update_fig(hObject,eventdata,handles)
+		if procdata.data_type=='DIC'
+			cla
+		elseif procdata.data_type=='DVC'
+			cla(axes1)
+			cla(axes2)
+			cla(axes3)
+		end
+		handles=guidata(hObject);
+		values=get(lb,'Value');
+		mask_check=get(ch_mask,'Value');
+		data_check=get(ch_data,'Value');
+		% values_length=length(values);
+		% length(handles.values)
+		% for i=1:length(handles.values)
+		% 	values(i+values_length)=handles.values(i);
+		% end
+		for i=1:procdata.current
+			if sum(values==i)
+				does(i)=1;
+			else
+				does(i)=0;
+			end
+		end
+		does2=ones(length(does));
+		if data_check==1
+			field=field_format(procdata,'which operations',does);
+		else
+			field=field_save;
+		end
+
+		% axes(axes1)
+		if procdata.data_type=='DIC'
+			% hAxes = findobj(gcf, 'type' ,'axes');
+	        x_tick=sort([field.POSX(1,1),field.POSX(1,end)]);
+	        y_tick=sort([field.POSY(1,1),field.POSY(end,1)]);
+	        p=procdata;
+	        p.which_operations=does;
+	        if data_check==1
+	        	p=update_masks_from_ref_point(p,field);
+	        end
+	        switch procdata.Contour
+	            case 'uX'
+	            	axes(axes1)
+	                imghandle =imagesc(x_tick,y_tick,field.UX);
+	                title('uX')
+	            case 'uY'
+	            	axes(axes1)
+	                imghandle =imagesc(x_tick,y_tick,field.UY);
+	                title('uY')
+	            case 'uZ'
+	            	axes(axes1)
+	                imghandle =imagesc(x_tick,y_tick,field.UZ);
+	                title('uZ')
+	        end
+	        set(axes1,'YDir','normal')
+	        xlabel('PosX')
+	        ylabel('PosY')
+	        axis equal tight
+	        if mask_check==1
+		        for i=1:procdata.current
+		        	if does(i)==1
+			            if findstr(p.op(i).shape,'rectangle')>0
+			                p.op(i).handle=imrect(axes1,[p.op(i).coord(1), p.op(i).coord(2), p.op(i).coord(3), p.op(i).coord(4)]);
+			                if findstr(p.op(i).clude,'include')
+			                    setColor(p.op(i).handle,'g')
+			                else
+			                    setColor(p.op(i).handle,'r')
+			                end
+			            elseif findstr(p.op(i).shape,'polygon')>0
+			                p.op(i).handle=impoly(axes1,p.op(i).coord);
+			                if findstr(p.op(i).clude,'include')
+			                    setColor(p.op(i).handle,'g')
+			                else
+			                    setColor(p.op(i).handle,'r')
+			                end
+			            elseif findstr(p.op(i).shape,'ellipse')>0
+			                p.op(i).handle=imellipse(axes1,[p.op(i).coord(1), p.op(i).coord(2), p.op(i).coord(3), p.op(i).coord(4)]);
+			                if findstr(p.op(i).clude,'include')
+			                    setColor(p.op(i).handle,'g')
+			                else
+			                    setColor(p.op(i).handle,'r')
+			                end
+			            elseif findstr(p.op(i).shape,'point')>0
+			                p.op(i).handle=impoint(axes1,[p.op(i).coord(1), p.op(i).coord(2)]);
+			                if findstr(p.op(i).clude,'include')
+			                    setColor(p.op(i).handle,'g')
+			                else
+			                    setColor(p.op(i).handle,'r')
+			                end
+			            end
+			        end
+			    end
+			end
+	    elseif procdata.data_type=='DVC'
+            x_tick=sort([field.POSX(1,1,1),field.POSX(1,end,1)]);
+            y_tick=sort([field.POSY(1,1,1),field.POSY(end,1,1)]);
+            p=procdata;
+	        p.which_operations=does;
+            if data_check==1
+	        	p=update_masks_from_ref_point(p,field);
+	        end
+            axes(axes1)
+            switch procdata.Contour
+                case 'uX'
+                    disp1(:,:)=field.UX(:,:,procdata.zheight);
+                    imghandle =imagesc(x_tick,y_tick,disp1);
+                case 'uY'
+                    disp1(:,:)=field.UY(:,:,procdata.zheight);
+                    imghandle =imagesc(x_tick,y_tick,disp1);
+                case 'uZ'
+                    disp1(:,:)=field.UZ(:,:,procdata.zheight);
+                    imghandle =imagesc(x_tick,y_tick,disp1);
+            end
+            x_tick=sort([field.POSX(1,1,1),field.POSX(1,end,1)]);
+            y_tick=sort([field.POSZ(1,1,1),field.POSZ(1,1,end)]);
+			set(gca,'YDir','normal')
+	        title(procdata.Contour)
+	        xlabel('PosX')
+	        ylabel('PosY')
+	        axes(axes2)
+            switch procdata.Contour
+                case 'uX'
+                    disp2(:,:)=field.UX(procdata.yheight,:,:);
+                    imghandle =imagesc(x_tick,y_tick,disp2);
+                case 'uY'
+                    disp2(:,:)=field.UY(procdata.yheight,:,:);
+                    imghandle =imagesc(x_tick,y_tick,disp2);
+                case 'uZ'
+                    disp2(:,:)=field.UZ(procdata.yheight,:,:);
+                    imghandle =imagesc(x_tick,y_tick,disp2);
+            end
+            set(gca,'YDir','normal')
+	        title(procdata.Contour)
+	        xlabel('PosX')
+	        ylabel('PosZ')
+            x_tick=sort([field.POSY(1,1,1),field.POSY(end,1,1)]);
+            y_tick=sort([field.POSZ(1,1,1),field.POSZ(1,1,end)]);
+            axes(axes3)
+            switch procdata.Contour
+                case 'uX'
+                    disp3(:,:)=field.UX(:,procdata.xheight,:);
+                    imghandle =imagesc(x_tick,y_tick,disp3);
+                case 'uY'
+                    disp3(:,:)=field.UY(:,procdata.xheight,:);
+                    imghandle =imagesc(x_tick,y_tick,disp3);
+                case 'uZ'
+                    disp3(:,:)=field.UZ(:,procdata.xheight,:);
+                    imghandle =imagesc(x_tick,y_tick,disp3);
+            end
+	        set(gca,'YDir','normal')
+	        title(procdata.Contour)
+	        xlabel('PosY')
+	        ylabel('PosZ')
+	        Xaxis='PosX';
+	        Yaxis='PosY';
+	        if mask_check==1
+		        for i=1:procdata.current
+		        	if sum(values==i)
+			            if (p.op(i).Xaxis==Xaxis)&(p.op(i).Yaxis==Yaxis)
+			                if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+			                    height=p.zheight;
+			                elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+			                    height=p.yheight;
+			                elseif (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+			                    height=p.xheight;
+			                end
+			                if (height>=min(p.op(i).mask_range))&(height<=max(p.op(i).mask_range))
+			                    if findstr(p.op(i).shape,'rectangle')>0
+			                        p.op(i).handle=imrect(axes1,[p.op(i).coord(1), p.op(i).coord(2), p.op(i).coord(3), p.op(i).coord(4)]);
+			                        if findstr(p.op(i).clude,'include')
+			                            setColor(p.op(i).handle,'g')
+			                        else
+			                            setColor(p.op(i).handle,'r')
+			                        end
+			                    elseif findstr(p.op(i).shape,'polygon')>0
+			                        p.op(i).handle=impoly(axes1,p.op(i).coord);
+			                        if findstr(p.op(i).clude,'include')
+			                            setColor(p.op(i).handle,'g')
+			                        else
+			                            setColor(p.op(i).handle,'r')
+			                        end
+			                    elseif findstr(p.op(i).shape,'ellipse')>0
+			                        p.op(i).handle=imellipse(axes1,[p.op(i).coord(1), p.op(i).coord(2), p.op(i).coord(3), p.op(i).coord(4)]);
+			                        if findstr(p.op(i).clude,'include')
+			                            setColor(p.op(i).handle,'g')
+			                        else
+			                            setColor(p.op(i).handle,'r')
+			                        end
+			                    elseif findstr(p.op(i).shape,'point')>0
+			                        p.op(i).handle=impoint(axes1,[p.op(i).coord(1), p.op(i).coord(2)]);
+			                        if findstr(p.op(i).clude,'include')
+			                            setColor(p.op(i).handle,'g')
+			                        else
+			                            setColor(p.op(i).handle,'r')
+			                        end
+			                    end
+			                end
+			            elseif findstr(p.op(i).shape,'point')>0
+			                if (Xaxis=='PosX')&(Yaxis=='PosY')
+			                    if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+			                        p.op(i).handle=impoint(axes1,[p.op(i).coord(1), field.POSY(p.op(i).height,1,1)]);
+			                    elseif (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+			                        p.op(i).handle=impoint(axes1,[field.POSX(1,p.op(i).height,1), p.op(i).coord(1)]);
+			                    end
+			                elseif (Xaxis=='PosX')&(Yaxis=='PosZ')
+			                    if (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+			                        p.op(i).handle=impoint(axes1,[field.POSX(1,p.op(i).height), p.op(i).coord(2)]);
+			                    elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+			                        p.op(i).handle=impoint(axes1,[p.op(i).coord(1), field.POSZ(1,1,p.op(i).height)]);
+			                    end
+			                elseif (Xaxis=='PosY')&(Yaxis=='PosZ')
+			                    if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+			                        p.op(i).handle=impoint(axes1,[field.POSY(p.op(i).height,1,1), p.op(i).coord(2)]);
+			                    elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+			                        p.op(i).handle=impoint(axes1,[p.op(i).coord(2), field.POSZ(1,1,p.op(i).height)]);
+			                    end
+			                end
+			            end
+			        end
+			    end
+			        Xaxis='PosX';
+			        Yaxis='PosZ';
+			        for i=1:procdata.current
+			        	if sum(values==i)
+				            if (p.op(i).Xaxis==Xaxis)&(p.op(i).Yaxis==Yaxis)
+				                if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+				                    height=p.zheight;
+				                elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+				                    height=p.yheight;
+				                elseif (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+				                    height=p.xheight;
+				                end
+				                if (height>=min(p.op(i).mask_range))&(height<=max(p.op(i).mask_range))
+				                    if findstr(p.op(i).shape,'rectangle')>0
+				                        p.op(i).handle=imrect(axes2,[p.op(i).coord(1), p.op(i).coord(2), p.op(i).coord(3), p.op(i).coord(4)]);
+				                        if findstr(p.op(i).clude,'include')
+				                            setColor(p.op(i).handle,'g')
+				                        else
+				                            setColor(p.op(i).handle,'r')
+				                        end
+				                    elseif findstr(p.op(i).shape,'polygon')>0
+				                        p.op(i).handle=impoly(axes2,p.op(i).coord);
+				                        if findstr(p.op(i).clude,'include')
+				                            setColor(p.op(i).handle,'g')
+				                        else
+				                            setColor(p.op(i).handle,'r')
+				                        end
+				                    elseif findstr(p.op(i).shape,'ellipse')>0
+				                        p.op(i).handle=imellipse(axes2,[p.op(i).coord(1), p.op(i).coord(2), p.op(i).coord(3), p.op(i).coord(4)]);
+				                        if findstr(p.op(i).clude,'include')
+				                            setColor(p.op(i).handle,'g')
+				                        else
+				                            setColor(p.op(i).handle,'r')
+				                        end
+				                    elseif findstr(p.op(i).shape,'point')>0
+				                        p.op(i).handle=impoint(axes2,[p.op(i).coord(1), p.op(i).coord(2)]);
+				                        if findstr(p.op(i).clude,'include')
+				                            setColor(p.op(i).handle,'g')
+				                        else
+				                            setColor(p.op(i).handle,'r')
+				                        end
+				                    end
+				                end
+				            elseif findstr(p.op(i).shape,'point')>0
+				                if (Xaxis=='PosX')&(Yaxis=='PosY')
+				                    if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+				                        p.op(i).handle=impoint(axes2,[p.op(i).coord(1), field.POSY(p.op(i).height,1,1)]);
+				                    elseif (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+				                        p.op(i).handle=impoint(axes2,[field.POSX(1,p.op(i).height,1), p.op(i).coord(1)]);
+				                    end
+				                elseif (Xaxis=='PosX')&(Yaxis=='PosZ')
+				                    if (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+				                        p.op(i).handle=impoint(axes2,[field.POSX(1,p.op(i).height), p.op(i).coord(2)]);
+				                    elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+				                        p.op(i).handle=impoint(axes2,[p.op(i).coord(1), field.POSZ(1,1,p.op(i).height)]);
+				                    end
+				                elseif (Xaxis=='PosY')&(Yaxis=='PosZ')
+				                    if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+				                        p.op(i).handle=impoint(axes2,[field.POSY(p.op(i).height,1,1), p.op(i).coord(2)]);
+				                    elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+				                        p.op(i).handle=impoint(axes2,[p.op(i).coord(2), field.POSZ(1,1,p.op(i).height)]);
+				                    end
+				                end
+				            end
+				        end
+				    end
+			        Xaxis='PosY';
+			        Yaxis='PosZ';
+			        for i=1:procdata.current
+			        	if sum(values==i)
+			            if (p.op(i).Xaxis==Xaxis)&(p.op(i).Yaxis==Yaxis)
+			                if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+			                    height=p.zheight;
+			                elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+			                    height=p.yheight;
+			                elseif (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+			                    height=p.xheight;
+			                end
+			                if (height>=min(p.op(i).mask_range))&(height<=max(p.op(i).mask_range))
+			                    if findstr(p.op(i).shape,'rectangle')>0
+			                        p.op(i).handle=imrect(axes3,[p.op(i).coord(1), p.op(i).coord(2), p.op(i).coord(3), p.op(i).coord(4)]);
+			                        if findstr(p.op(i).clude,'include')
+			                            setColor(p.op(i).handle,'g')
+			                        else
+			                            setColor(p.op(i).handle,'r')
+			                        end
+			                    elseif findstr(p.op(i).shape,'polygon')>0
+			                        p.op(i).handle=impoly(axes3,p.op(i).coord);
+			                        if findstr(p.op(i).clude,'include')
+			                            setColor(p.op(i).handle,'g')
+			                        else
+			                            setColor(p.op(i).handle,'r')
+			                        end
+			                    elseif findstr(p.op(i).shape,'ellipse')>0
+			                        p.op(i).handle=imellipse(axes3,[p.op(i).coord(1), p.op(i).coord(2), p.op(i).coord(3), p.op(i).coord(4)]);
+			                        if findstr(p.op(i).clude,'include')
+			                            setColor(p.op(i).handle,'g')
+			                        else
+			                            setColor(p.op(i).handle,'r')
+			                        end
+			                    elseif findstr(p.op(i).shape,'point')>0
+			                        p.op(i).handle=impoint(axes3,[p.op(i).coord(1), p.op(i).coord(2)]);
+			                        if findstr(p.op(i).clude,'include')
+			                            setColor(p.op(i).handle,'g')
+			                        else
+			                            setColor(p.op(i).handle,'r')
+			                        end
+			                    end
+			                end
+			            elseif findstr(p.op(i).shape,'point')>0
+			                if (Xaxis=='PosX')&(Yaxis=='PosY')
+			                    if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+			                        p.op(i).handle=impoint(axes3,[p.op(i).coord(1), field.POSY(p.op(i).height,1,1)]);
+			                    elseif (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+			                        p.op(i).handle=impoint(axes3,[field.POSX(1,p.op(i).height,1), p.op(i).coord(1)]);
+			                    end
+			                elseif (Xaxis=='PosX')&(Yaxis=='PosZ')
+			                    if (p.op(i).Xaxis=='PosY')&(p.op(i).Yaxis=='PosZ')
+			                        p.op(i).handle=impoint(axes3,[field.POSX(1,p.op(i).height), p.op(i).coord(2)]);
+			                    elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+			                        p.op(i).handle=impoint(axes3,[p.op(i).coord(1), field.POSZ(1,1,p.op(i).height)]);
+			                    end
+			                elseif (Xaxis=='PosY')&(Yaxis=='PosZ')
+			                    if (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosZ')
+			                        p.op(i).handle=impoint(axes3,[field.POSY(p.op(i).height,1,1), p.op(i).coord(2)]);
+			                    elseif (p.op(i).Xaxis=='PosX')&(p.op(i).Yaxis=='PosY')
+			                        p.op(i).handle=impoint(axes3,[p.op(i).coord(2), field.POSZ(1,1,p.op(i).height)]);
+			                    end
+			                end
+			            end
+			        end
+			    end
+		    end
+	    end
+		guidata(hObject, handles);
+	end
+end
+
+% this function is used to import the data
+function [field,procdata]=import_data(procdata,filename,pathname)
+	l=length(pathname);
+	%if pahtname doesn't end in backslash
+	if pathname(l)~='\' % assuming windows 
+		pahtname(l+1)='\';
+	end
+	if findstr(procdata.data_type,'DIC')>0
+		if findstr(procdata.dic_type,'2D')>0
+			dat_check=findstr(filename,'.dat');
+		    vc7_check=findstr(filename,'.vc7');
+		    if dat_check~=0 %if file is a dat file then use getDICdata to obtain data
+		        fprintf('~ Loading dataset %s ...',filename);
+		        field_got=getDICdata(pathname,filename);
+		        fprintf('done\n',filename);
+		        %store data in 'handles' variable
+		        field=field_got;
+		        procdata.zheight=1;
+		        procdata.xheight=1;
+		        procdata.yheight=1;
+		    elseif vc7_check>0 %if file is a vc7 file
+		        fprintf('~ Loading dataset %s ...',filename);
+		        [field_got,useless_field]=getVC7data2D(filename,pathname);
+		        fprintf('done\n',filename);
+		        field.POSX=field_got.POSX;
+		        field.POSY=field_got.POSY;
+		        field.POSZ=field_got.POSZ;
+		        field.UX=field_got.UX;
+		        field.UY=field_got.UY;
+		        %create a matrix of zeros for uZ since no uZ data will be available in the VC7 file
+		        [r,c]=size(field.UX);
+		        field.uZ=zeros(r,c);
+		        procdata.zheight=1;
+		        procdata.xheight=1;
+		        procdata.yheight=1;
+		    end
+		elseif findstr(procdata.dic_type,'3D');
+			dat_check=findstr(filename,'.dat');
+		    vc7_check=findstr(filename,'.vc7');
+		    if dat_check~=0 %if file is a dat file then use getDICdata to obtain data
+		        fprintf('~ Loading dataset %s ...',filename);
+		        field=getDICdata(pathname,filename);
+		        fprintf('done\n',filename);
+		        procdata.zheight=1;
+		        procdata.xheight=1;
+		        procdata.yheight=1;
+		    elseif vc7_check>0 %if file is a vc7 file
+		        fprintf('~ Loading dataset %s ...',filename);
+		        [field_got,useless_field]=getVC7data(filename,pathname);
+		        fprintf('done\n',filename);
+		        field.POSX=field_got.POSX;
+		        field.POSY=field_got.POSY;
+		        field.POSZ=field_got.POSZ;
+		        field.UX=field_got.UX;
+		        field.UY=field_got.UY;
+		        field.UZ=field_got.UZ;
+		        procdata.zheight=1;
+		        procdata.xheight=1;
+		        procdata.yheight=1;
+		    end
+		end
+	elseif findstr(procdata.data_type,'DVC')>0
+		dat_check=findstr(filename,'.dat');
+	    vc7_check=findstr(filename,'.vc7');
+	    if dat_check~=0
+	        fprintf('~ Loading dataset %s ...',filename);
+	        [field,gridspacing]=getDVCdata6(filename,pathname);
+	        fprintf('done\n',filename);
+			procdata.zheight=floor(max(size(field.UY(1,1,:)))/2);
+			procdata.xheight=floor(max(size(field.UY(1,:,1)))/2);
+			procdata.yheight=floor(max(size(field.UY(:,1,1)))/2);
+			procdata.zmax=max(size(field.UY(1,1,:)));
+			procdata.xmax=max(size(field.UY(1,:,1)));
+			procdata.ymax=max(size(field.UY(:,1,1)));
+	    elseif vc7_check~=0
+	        fprintf('~ Loading dataset %s ...',filename);
+	        [field_got,useless_field]=getVC7data(filename,pathname);
+	        fprintf('done\n',filename);
+	        field.POSX=field_got.POSX;
+	        field.POSY=field_got.POSY;
+	        field.POSZ=field_got.POSZ;
+	        field.UX=field_got.UX;
+	        field.UY=field_got.UY;
+	        field.UZ=field_got.UZ;
+	        procdata.zheight=floor(max(size(field_got.UY(1,1,:)))/2);
+	        procdata.xheight=floor(max(size(field_got.UY(1,:,1)))/2);
+	        procdata.yheight=floor(max(size(field_got.UY(:,1,1)))/2);
+	        procdata.zmax=max(size(field_got.UY(1,1,:)));
+	        procdata.xmax=max(size(field_got.UY(1,:,1)));
+	        procdata.ymax=max(size(field_got.UY(:,1,1)));
+	    end
+	elseif findstr(procdata.data_type,'FEM')>0
+	    fullfilename=strcat(pathname,filename);
+	    idmask=[nan,nan,nan,nan,nan,nan];
+	    fprintf('~ Loading dataset %s ...\n',filename);
+	    [fieldfem,crackfem] = getFEMdata7(fullfilename,1,idmask);
+	    fprintf('done\n',filename);
+	    field.POSX=fieldfem.POSX;
+	    field.POSY=fieldfem.POSY;
+	    field.POSZ=fieldfem.POSZ;
+	    field.UX=fieldfem.UX;
+	    field.UY=fieldfem.UY;
+	    field.UZ=fieldfem.UZ;
+	end
+end
+
+% this function is used to edit the masks coordinate data so that they are correctly placed when a reference point is active
+function procdata=update_masks_from_ref_point(procdata,field)
+	ref_check=0;
+	for i=1:procdata.current
+		if findstr(procdata.op(i).act,'ref')
+			if procdata.which_operations==-1
+				ref_check=i;
+			elseif procdata.which_operations(i)==1
+				ref_check=i;
+			end
+		end
+	end
+	if (procdata.data_type=='DIC')&(ref_check~=0)
+		x_ref=procdata.op(ref_check).coord(1);
+		y_ref=procdata.op(ref_check).coord(2);
+		for i=1:procdata.current
+			if procdata.which_operations==-1
+				switch procdata.op(i).shape
+				case 'rectangle'
+					procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+					procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+				case 'ellipse'
+					procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+					procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+				case 'polygon'
+					[r,c]=size(procdata.op(i).coord);
+					for j=1:r
+						procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-x_ref;
+						procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-y_ref;
+					end
+				case 'point'
+					procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+					procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+				end
+			elseif procdata.which_operations(i)==1
+				switch procdata.op(i).shape
+				case 'rectangle'
+					procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+					procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+				case 'ellipse'
+					procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+					procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+				case 'polygon'
+					[r,c]=size(procdata.op(i).coord);
+					for j=1:r
+						procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-x_ref;
+						procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-y_ref;
+					end
+				case 'point'
+					procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+					procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+				end
+			end
+		end
+	elseif (procdata.data_type=='DVC')&(ref_check~=0)
+		if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+			x_ref=procdata.op(ref_check).coord(1);
+			y_ref=procdata.op(ref_check).coord(2);
+			z_ref=field.POSZ(1,1,procdata.op(ref_check).height);
+		elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+			x_ref=procdata.op(ref_check).coord(1);
+			z_ref=procdata.op(ref_check).coord(2);
+			y_ref=field.POSY(procdata.op(ref_check).height,1,1);
+		elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+			y_ref=procdata.op(ref_check).coord(1);
+			z_ref=procdata.op(ref_check).coord(2);
+			x_ref=field.POSX(1,procdata.op(ref_check).height,1);
+		end
+		for i=1:procdata.current
+			if procdata.which_operations==-1
+				switch procdata.op(i).shape
+				case 'rectangle'
+					if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+						procdata.op(i).height=procdata.op(i).height-z_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-y_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-x_ref;
+					end
+				case 'ellipse'
+					if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+						procdata.op(i).height=procdata.op(i).height-z_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-y_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-x_ref;
+					end
+				case 'polygon'
+					[r,c]=size(procdata.op(i).coord);
+					if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+						for j=1:r
+							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-x_ref;
+							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-y_ref;
+						end
+						procdata.op(i).height=procdata.op(i).height-z_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+						for j=1:r
+							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-x_ref;
+							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-z_ref;
+						end
+						procdata.op(i).height=procdata.op(i).height-y_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+						for j=1:r
+							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-y_ref;
+							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-z_ref;
+						end
+						procdata.op(i).height=procdata.op(i).height-x_ref;
+					end	
+				case 'point'
+					if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+						procdata.op(i).height=procdata.op(i).height-z_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-y_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-x_ref;
+					end
+				end
+			elseif procdata.which_operations(i)==1
+				switch procdata.op(i).shape
+				case 'rectangle'
+					if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+						procdata.op(i).height=procdata.op(i).height-z_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-y_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-x_ref;
+					end
+				case 'ellipse'
+					if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+						procdata.op(i).height=procdata.op(i).height-z_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-y_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-x_ref;
+					end
+				case 'polygon'
+					[r,c]=size(procdata.op(i).coord);
+					if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+						for j=1:r
+							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-x_ref;
+							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-y_ref;
+						end
+						procdata.op(i).height=procdata.op(i).height-z_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+						for j=1:r
+							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-x_ref;
+							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-z_ref;
+						end
+						procdata.op(i).height=procdata.op(i).height-y_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+						for j=1:r
+							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-y_ref;
+							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-z_ref;
+						end
+						procdata.op(i).height=procdata.op(i).height-x_ref;
+					end
+				case 'point'
+					if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
+						procdata.op(i).height=procdata.op(i).height-z_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-y_ref;
+					elseif (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
+						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
+						procdata.op(i).height=procdata.op(i).height-x_ref;
+					end	
+				end
+			end
+		end
+	end
+end

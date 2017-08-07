@@ -1,0 +1,76 @@
+MHData_type_2DIC(hObject,~,handles) - import 2D DIC data
+
+MHData_type_3DIC(hObject,~,handles) - import 3D DIC data
+
+MHData_type_DVC(hObject,~,handles) - import DVC data
+
+Slider_callback(hObject,eventdata,handles) - slider for DVC data
+
+MHData_type_FEM(hObject,~,handles) - import fem data
+
+MHData_Load_maskfile(hObject,eventdata,handles) - load masks into GUI
+
+MHData_edit_masks(hObject,eventdata,handles) - make loaded masks editable
+
+MHData_Close(hObject,~,handles) - close GUI and write output file
+
+MHData_Close_field(hObject,~,handles) - close GUI and write output file
+
+MHCrop_Rect(hObject, eventdata, handles) - rectangular crop
+
+MHCrop_Del(hObject, eventdata, handles) - function to delete all crops
+
+MHMask_Rect(hObject, eventdata, handles) - create rectangular mask
+
+MHMask_Poly(hObject, eventdata, handles) - create polynomial masks
+
+MHMask_Ellip(hObject, eventdata, handles) - create ellipse masks
+
+MHMask_Del(hObject, eventdata, handles) - delete masks
+
+MHROI_Rect(hObject, eventdata, handles) - create rectangular ROI
+
+MHROI_Poly(hObject, eventdata, handles) - polynomial ROI
+
+MHROI_Ellip(hObject, eventdata, handles) - create elliptical ROI
+
+MHROI_Del(hObject, eventdata, handles) - delete ROI
+
+MHRefpoint_Point(hObject, eventdata, handles) - create reference point
+
+MHRefpoint_Del(hObject, eventdata, handles) - delete reference points
+
+MHOptions_Set(hObject, eventdata,handles) - set which options are to be used to process the data
+
+MHOptions_show_data(hObject,eventdata,handles) - run backend to show results of chosen options
+
+MHOptions_Show(hObject,eventdata,handles) - assign data to the workspace
+
+MHOptions_hatch(hObject,eventdata,handles) - function to hatch out data
+
+MHDisp_uX(hObject, eventdata, handles) - display uX
+
+MHDisp_uY(hObject, eventdata, handles) - display uY
+
+MHDisp_uZ(hObject, eventdata, handles) - display uZ
+
+MHGraph_XposX_YposY(hObject,eventdata,handles) - X and Y axes
+
+MHGraph_XposX_YposZ(hObject,eventdata,handles) - X and Z axes
+
+MHGraph_XposY_YposZ(hObject,eventdata,handles) - Y and Z axes
+
+MHGraph_Xheight(hObject,eventdata,handles) - change x height
+
+MHGraph_Yheight(hObject,eventdata,handles) - change y height
+
+MHGraph_Zheight(hObject,eventdata,handles) - change z height
+
+callbackroi( roicount ) - function to allow the positions of the masks to be updated and provide the rightclickmenu for them
+
+[roi,roicount]=remove_deleted_ops(roi,roicount) - update roi so that operations removed by rightclickmenu are removed
+
+[handles,roi]=update_figure(roi,roicount,handles,Xaxis,Yaxis,Contour,xheight,yheight,zheight) - update figure to correct axes and data
+
+[field,procdata]=import_data(procdata,filename,pathname) - function to import data for MHData_load_maskfile
+
