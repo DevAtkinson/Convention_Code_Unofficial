@@ -459,12 +459,12 @@ function MHData_Load_maskfile(hObject,eventdata,handles)
                 handles.uistuff.textbox=uicontrol('Style','text','Position',[5,50,60,30],'String',num2str(handles.field.PosZ(1,1,handles.procdata.zheight)),'ToolTipString',sprintf('The currently viewed plane''s value'));
                 handles.uistuff.textbox2=uicontrol('Style','text','Position',[5,30,60,20],'String',sprintf('%d/%d',handles.procdata.zheight,handles.procdata.zmax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
                 slider_step=[1 1]/(handles.procdata.zmax-1);
-            elseif (handles.procdata.Xaxis=='PosZ')&(handles.procdata.Yaxis=='PosX')
+            elseif (handles.procdata.Xaxis=='PosX')&(handles.procdata.Yaxis=='PosZ')
                 handles.uistuff.slider=uicontrol('Style','slider','Position',[20,100,20,300],'min',1,'max',handles.procdata.ymax,'value',handles.procdata.yheight,'Callback',@Slider_callback);
                 handles.uistuff.textbox=uicontrol('Style','text','Position',[5,50,60,30],'String',num2str(handles.field.PosY(handles.procdata.yheight,1,1)),'ToolTipString',sprintf('The currently viewed plane''s value'));
                 handles.uistuff.textbox2=uicontrol('Style','text','Position',[5,30,60,20],'String',sprintf('%d/%d',handles.procdata.yheight,handles.procdata.ymax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
                 slider_step=[1 1]/(handles.procdata.ymax-1);
-            elseif (handles.procdata.Xaxis=='PosZ')&(handles.procdata.Yaxis=='PosY')
+            elseif (handles.procdata.Xaxis=='PosY')&(handles.procdata.Yaxis=='PosZ')
                 handles.uistuff.slider=uicontrol('Style','slider','Position',[20,100,20,300],'min',1,'max',handles.procdata.xmax,'value',handles.procdata.xheight,'Callback',@Slider_callback);
                 handles.uistuff.textbox=uicontrol('Style','text','Position',[5,50,60,30],'String',num2str(handles.field.PosX(1,handles.procdata.xheight,1)),'ToolTipString',sprintf('The currently viewed plane''s value'));
                 handles.uistuff.textbox2=uicontrol('Style','text','Position',[5,30,60,20],'String',sprintf('%d/%d',handles.procdata.xheight,handles.procdata.xmax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
@@ -593,45 +593,54 @@ function MHData_edit_masks(hObject,eventdata,handles)
             y_tick=sort([handles.field.PosY(1,1,1),handles.field.PosY(end,1,1)]);
             switch handles.procdata.Contour
                 case 'uX'
-                    dispX(:,:)=handles.field.uX(:,:,handles.procdata.zheight);
+                    dispX(:,:)=squeeze(handles.field.uX(:,:,handles.procdata.zheight));
                     imghandle =imagesc(x_tick,y_tick,dispX);
+                    set(gca,'YDir','normal');
                 case 'uY'
-                    dispY(:,:)=handles.field.uY(:,:,handles.procdata.zheight);
+                    dispY(:,:)=squeeze(handles.field.uY(:,:,handles.procdata.zheight));
                     imghandle =imagesc(x_tick,y_tick,dispY);
+                    set(gca,'YDir','normal');
                 case 'uZ'
-                    dispZ(:,:)=handles.field.uZ(:,:,handles.procdata.zheight);
+                    dispZ(:,:)=squeeze(handles.field.uZ(:,:,handles.procdata.zheight));
                     imghandle =imagesc(x_tick,y_tick,dispZ);
+                    set(gca,'YDir','normal');
             end
-        elseif (handles.procdata.Xaxis=='PosZ')&(handles.procdata.Yaxis=='PosX')
+        elseif (handles.procdata.Xaxis=='PosX')&(handles.procdata.Yaxis=='PosZ')
             x_tick=sort([handles.field.PosX(1,1,1),handles.field.PosX(1,end,1)]);
             y_tick=sort([handles.field.PosZ(1,1,1),handles.field.PosZ(1,1,end)]);
             switch handles.procdata.Contour
                 case 'uX'
-                    dispX(:,:)=handles.field.uX(handles.procdata.yheight,:,:);
+                    dispX(:,:)=squeeze(handles.field.uX_c(:,handles.procdata.yheight,:));
                     imghandle =imagesc(x_tick,y_tick,dispX);
+                    set(gca,'YDir','normal');
                 case 'uY'
-                    dispY(:,:)=handles.field.uY(handles.procdata.yheight,:,:);
+                    dispY(:,:)=squeeze(handles.field.uY_c(:,handles.procdata.yheight,:));
                     imghandle =imagesc(x_tick,y_tick,dispY);
+                    set(gca,'YDir','normal');
                 case 'uZ'
-                    dispZ(:,:)=handles.field.uZ(handles.procdata.yheight,:,:);
+                    dispZ(:,:)=squeeze(handles.field.uZ_c(:,handles.procdata.yheight,:));
                     imghandle =imagesc(x_tick,y_tick,dispZ);
+                    set(gca,'YDir','normal');
             end
-        elseif (handles.procdata.Xaxis=='PosZ')&(handles.procdata.Yaxis=='PosY')
+        elseif (handles.procdata.Xaxis=='PosY')&(handles.procdata.Yaxis=='PosZ')
             x_tick=sort([handles.field.PosY(1,1,1),handles.field.PosY(end,1,1)]);
             y_tick=sort([handles.field.PosZ(1,1,1),handles.field.PosZ(1,1,end)]);
             switch handles.procdata.Contour
                 case 'uX'
-                    dispX(:,:)=handles.field.uX(:,handles.procdata.xheight,:);
+                    dispX(:,:)=squeeze(handles.field.uX_c(:,:,handles.procdata.xheight));
                     imghandle =imagesc(x_tick,y_tick,dispX);
+                    set(gca,'YDir','normal');
                 case 'uY'
-                    dispY(:,:)=handles.field.uY(:,handles.procdata.xheight,:);
+                    dispY(:,:)=squeeze(handles.field.uY_c(:,:,handles.procdata.xheight));
                     imghandle =imagesc(x_tick,y_tick,dispY);
+                    set(gca,'YDir','normal');
                 case 'uZ'
-                    dispZ(:,:)=handles.field.uZ(:,handles.procdata.xheight,:);
+                    dispZ(:,:)=squeeze(handles.field.uZ_c(:,:,handles.procdata.xheight));
                     imghandle =imagesc(x_tick,y_tick,dispZ);
+                    set(gca,'YDir','normal');
             end
         end
-        set(gca,'YDir','normal')
+        % set(gca,'YDir','normal')
         title(handles.procdata.Contour)
         xlabel(handles.procdata.Xaxis)
         ylabel(handles.procdata.Yaxis)
@@ -640,9 +649,9 @@ function MHData_edit_masks(hObject,eventdata,handles)
             if ((roi(i).Xaxis==handles.procdata.Xaxis)&(roi(i).Yaxis==handles.procdata.Yaxis))|(findstr(roi(i).shape,'point'))
                 if (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosY')
                     height=handles.procdata.zheight;
-                elseif (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosX')
+                elseif (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosZ')
                     height=handles.procdata.yheight;
-                elseif (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosY')
+                elseif (roi(i).Xaxis=='PosY')&(roi(i).Yaxis=='PosZ')
                     height=handles.procdata.xheight;
                 end
                 if (height>=min(roi(i).mask_range))&(height<=max(roi(i).mask_range))
@@ -702,23 +711,23 @@ function MHData_edit_masks(hObject,eventdata,handles)
                         if (handles.procdata.Xaxis=='PosX')&(handles.procdata.Yaxis=='PosY')
                             if (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosY')
                                 roi(i).handles=impoint(gca,roi(i).coord);
-                            elseif (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosX')
+                            elseif (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosZ')
                                 roi(i).handle=impoint(gca,[roi(i).coord(1),handles.field.PosY(roi(i).height,1,1)]);
-                            elseif (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosY')
+                            elseif (roi(i).Xaxis=='PosY')&(roi(i).Yaxis=='PosZ')
                                 roi(i).handle=impoint(gca,[handles.field.PosX(1,roi(i).height,1), roi(i).coord(1)]);
                             end
-                        elseif (handles.procdata.Xaxis=='PosZ')&(handles.procdata.Yaxis=='PosX')
-                            if (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosX')
+                        elseif (handles.procdata.Xaxis=='PosX')&(handles.procdata.Yaxis=='PosZ')
+                            if (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosZ')
                                 roi(i).handle=impoint(gca,roi(i).coord);
-                            elseif (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosY')
+                            elseif (roi(i).Xaxis=='PosY')&(roi(i).Yaxis=='PosZ')
                                 roi(i).handle=impoint(gca,[handles.field.PosX(1,roi(i).height), roi(i).coord(2)]);
                             elseif (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosY')
                                 roi(i).handle=impoint(gca,[roi(i).coord(1), handles.field.PosZ(1,1,roi(i).height)]);
                             end
-                        elseif (handles.procdata.Xaxis=='PosZ')&(handles.procdata.Yaxis=='PosY')
-                            if (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosY')
+                        elseif (handles.procdata.Xaxis=='PosY')&(handles.procdata.Yaxis=='PosZ')
+                            if (roi(i).Xaxis=='PosY')&(roi(i).Yaxis=='PosZ')
                                 roi(i).handle=impoint(gca,roi(i).coord);
-                            elseif (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosX')
+                            elseif (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosZ')
                                 roi(i).handle=impoint(gca,[handles.field.PosY(roi(i).height,1,1), roi(i).coord(2)]);
                             elseif (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosY')
                                 roi(i).handle=impoint(gca,[roi(i).coord(2), handles.field.PosZ(1,1,roi(i).height)]);
@@ -842,10 +851,10 @@ function MHCrop_Rect(hObject, eventdata, handles)
         if (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosY')
             roi(roicount).mask_range=sort([1 handles.procdata.zmax]);
             roi(roicount).height=handles.procdata.zheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosX')
+        elseif (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.ymax]);
             roi(roicount).height=handles.procdata.yheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosY')
+        elseif (roi(roicount).Xaxis=='PosY')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.xmax]);
             roi(roicount).height=handles.procdata.xheight;
         end
@@ -915,10 +924,10 @@ function MHMask_Rect(hObject, eventdata, handles)
         if (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosY')
             roi(roicount).mask_range=sort([1 handles.procdata.zmax]);
             roi(roicount).height=handles.procdata.zheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosX')
+        elseif (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.ymax]);
             roi(roicount).height=handles.procdata.yheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosY')
+        elseif (roi(roicount).Xaxis=='PosY')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.xmax]);
             roi(roicount).height=handles.procdata.xheight;
         end
@@ -955,10 +964,10 @@ function MHMask_Poly(hObject, eventdata, handles)
         if (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosY')
             roi(roicount).mask_range=sort([1 handles.procdata.zmax]);
             roi(roicount).height=handles.procdata.zheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosX')
+        elseif (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.ymax]);
             roi(roicount).height=handles.procdata.yheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosY')
+        elseif (roi(roicount).Xaxis=='PosY')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.xmax]);
             roi(roicount).height=handles.procdata.xheight;
         end
@@ -995,10 +1004,10 @@ function MHMask_Ellip(hObject, eventdata, handles)
         if (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosY')
             roi(roicount).mask_range=sort([1 handles.procdata.zmax]);
             roi(roicount).height=handles.procdata.zheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosX')
+        elseif (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.ymax]);
             roi(roicount).height=handles.procdata.yheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosY')
+        elseif (roi(roicount).Xaxis=='PosY')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.xmax]);
             roi(roicount).height=handles.procdata.xheight;
         end
@@ -1072,10 +1081,10 @@ function MHROI_Rect(hObject, eventdata, handles)
         if (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosY')
             roi(roicount).mask_range=sort([1 handles.procdata.zmax]);
             roi(roicount).height=handles.procdata.zheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosX')
+        elseif (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.ymax]);
             roi(roicount).height=handles.procdata.yheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosY')
+        elseif (roi(roicount).Xaxis=='PosY')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.xmax]);
             roi(roicount).height=handles.procdata.xheight;
         end
@@ -1112,10 +1121,10 @@ function MHROI_Poly(hObject, eventdata, handles)
         if (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosY')
             roi(roicount).mask_range=sort([1 handles.procdata.zmax]);
             roi(roicount).height=handles.procdata.zheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosX')
+        elseif (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.ymax]);
             roi(roicount).height=handles.procdata.yheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosY')
+        elseif (roi(roicount).Xaxis=='PosY')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.xmax]);
             roi(roicount).height=handles.procdata.xheight;
         end
@@ -1152,10 +1161,10 @@ function MHROI_Ellip(hObject, eventdata, handles)
         if (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosY')
             roi(roicount).mask_range=sort([1 handles.procdata.zmax]);
             roi(roicount).height=handles.procdata.zheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosX')
+        elseif (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.ymax]);
             roi(roicount).height=handles.procdata.yheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosY')
+        elseif (roi(roicount).Xaxis=='PosY')&(roi(roicount).Yaxis=='PosZ')
             roi(roicount).mask_range=sort([1 handles.procdata.xmax]);
             roi(roicount).height=handles.procdata.xheight;
         end
@@ -1241,7 +1250,7 @@ function MHRefpoint_Point(hObject, eventdata, handles)
             roi(roicount).coord = p_out;
             roi(roicount).mask_range=[1 handles.procdata.zmax];
             roi(roicount).height=handles.procdata.zheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosX')
+        elseif (roi(roicount).Xaxis=='PosX')&(roi(roicount).Yaxis=='PosZ')
             [valx,indx]=min(abs(handles.field.PosX(1,:,1)-position(2)));
             [valz,indz]=min(abs(handles.field.PosZ(1,1,:)-position(1)));
             p_out(2)=handles.field.PosX(1,indx,1);
@@ -1249,7 +1258,7 @@ function MHRefpoint_Point(hObject, eventdata, handles)
             roi(roicount).coord = p_out;
             roi(roicount).mask_range=[1 handles.procdata.ymax];
             roi(roicount).height=handles.procdata.yheight;
-        elseif (roi(roicount).Xaxis=='PosZ')&(roi(roicount).Yaxis=='PosY')
+        elseif (roi(roicount).Xaxis=='PosY')&(roi(roicount).Yaxis=='PosZ')
             [valy,indy]=min(abs(handles.field.PosY(:,1,1)-position(2)));
             [valz,indz]=min(abs(handles.field.PosZ(1,1,:)-position(1)));
             p_out(2)=handles.field.PosY(indy,1,1);
@@ -1535,16 +1544,16 @@ function MHOptions_hatch(hObject,eventdata,handles)
             Valid_up(:,:)=isnan(field.uX(:,:,handles.procdata.zheight));
             switch handles.procdata.Contour
             case 'uX'
-                f(:,:)=handles.field.uX(:,:,handles.procdata.zheight);
+                f(:,:)=squeeze(handles.field.uX(:,:,handles.procdata.zheight));
                 title_string='uX';
             case 'uY'
-                f(:,:)=handles.field.uY(:,:,handles.procdata.zheight);
+                f(:,:)=squeeze(handles.field.uY(:,:,handles.procdata.zheight));
                 title_string='uY';
             case 'uZ'
-                f(:,:)=handles.field.uZ(:,:,handles.procdata.zheight);
+                f(:,:)=squeeze(handles.field.uZ(:,:,handles.procdata.zheight));
                 title_string='uZ';
             end
-        elseif (handles.procdata.Xaxis=='PosZ')&(handles.procdata.Yaxis=='PosX')
+        elseif (handles.procdata.Xaxis=='PosX')&(handles.procdata.Yaxis=='PosZ')
             x_tick=sort([handles.field.PosX(1,1,1), handles.field.PosX(1,end,1)]);
             y_tick=sort([handles.field.PosZ(1,1,1), handles.field.PosZ(1,1,end)]);
             % y_leg=zeros(c,1);
@@ -1554,18 +1563,18 @@ function MHOptions_hatch(hObject,eventdata,handles)
             Valid_up(:,:)=isnan(field.uX(handles.procdata.yheight,:,:));
             switch handles.procdata.Contour
             case 'uX'
-                f(:,:)=handles.field.uX(handles.procdata.yheight,:,:);
+                f(:,:)=squeeze(handles.field.uX_c(:,handles.procdata.yheight,:));
                 title_string='uX';
             case 'uY'
-                f(:,:)=handles.field.uY(handles.procdata.yheight,:,:);
+                f(:,:)=squeeze(handles.field.uY_c(:,handles.procdata.yheight,:));
                 title_string='uY';
             case 'uZ'
-                f(:,:)=handles.field.uZ(handles.procdata.yheight,:,:);
+                f(:,:)=squeeze(handles.field.uZ_c(:,handles.procdata.yheight,:));
                 title_string='uZ';
             end
             f=rot90(fliplr(f),1);
             Valid_up=rot90(fliplr(Valid_up),1);
-        elseif (handles.procdata.Xaxis=='PosZ')&(handles.procdata.Yaxis=='PosY')
+        elseif (handles.procdata.Xaxis=='PosY')&(handles.procdata.Yaxis=='PosZ')
             x_tick=sort([handles.field.PosY(1,1,1), handles.field.PosY(end,1,1)]);
             y_tick=sort([handles.field.PosZ(1,1,1), handles.field.PosZ(1,1,end)]);
             % y_leg=zeros(r,1);
@@ -1576,13 +1585,13 @@ function MHOptions_hatch(hObject,eventdata,handles)
 
             switch handles.procdata.Contour
             case 'uX'
-                f(:,:)=handles.field.uX(:,handles.procdata.xheight,:);
+                f(:,:)=squeeze(handles.field.uX_c(:,:,handles.procdata.xheight));
                 title_string='uX';
             case 'uY'
-                f(:,:)=handles.field.uY(:,handles.procdata.xheight,:);
+                f(:,:)=squeeze(handles.field.uY_c(:,:,handles.procdata.xheight));
                 title_string='uY';
             case 'uZ'
-                f(:,:)=handles.field.uZ(:,handles.procdata.xheight,:);
+                f(:,:)=squeeze(handles.field.uZ_c(:,:,handles.procdata.xheight));
                 
                 title_string='uZ';
             end
@@ -1599,10 +1608,11 @@ function MHOptions_hatch(hObject,eventdata,handles)
         f=f-f_min;
         m=max(max(f));
         f=f.*1/m;
+        %plot figure
         imagesc(x_tick,y_tick,f,[0 1]);
         set(gca,'YDir','normal');
-        xlabel('PosX');
-        ylabel('PosY');
+        xlabel(handles.procdata.Xaxis)
+        ylabel(handles.procdata.Yaxis)
         title(title_string);
         axis equal tight
         hold on
@@ -1994,9 +2004,9 @@ function [handles,roi]=update_figure(roi,roicount,handles,Xaxis,Yaxis,Contour,xh
                 if (roi(i).Xaxis==Xaxis)&(roi(i).Yaxis==Yaxis)
                     if (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosY')
                         height=handles.procdata.zheight;
-                    elseif (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosX')
+                    elseif (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosZ')
                         height=handles.procdata.yheight;
-                    elseif (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosY')
+                    elseif (roi(i).Xaxis=='PosY')&(roi(i).Yaxis=='PosZ')
                         height=handles.procdata.xheight;
                     end
                     if (height>=min(roi(i).mask_range))&(height<=max(roi(i).mask_range))
@@ -2037,14 +2047,14 @@ function [handles,roi]=update_figure(roi,roicount,handles,Xaxis,Yaxis,Contour,xh
                         elseif (roi(i).Xaxis=='PosY')&(roi(i).Yaxis=='PosZ')
                             roi(i).handle=impoint(gca,[handles.field.PosX(1,roi(i).height,1), roi(i).coord(1)]);
                         end
-                    elseif (Xaxis=='PosZ')&(Yaxis=='PosX')
-                        if (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosY')
+                    elseif (Xaxis=='PosX')&(Yaxis=='PosZ')
+                        if (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosZ')
                             roi(i).handle=impoint(gca,[handles.field.PosX(1,roi(i).height), roi(i).coord(2)]);
                         elseif (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosY')
                             roi(i).handle=impoint(gca,[roi(i).coord(1), handles.field.PosZ(1,1,roi(i).height)]);
                         end
-                    elseif (Xaxis=='PosZ')&(Yaxis=='PosY')
-                        if (roi(i).Xaxis=='PosZ')&(roi(i).Yaxis=='PosX')
+                    elseif (Xaxis=='PosY')&(Yaxis=='PosZ')
+                        if (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosZ')
                             roi(i).handle=impoint(gca,[handles.field.PosY(roi(i).height,1,1), roi(i).coord(2)]);
                         elseif (roi(i).Xaxis=='PosX')&(roi(i).Yaxis=='PosY')
                             roi(i).handle=impoint(gca,[roi(i).coord(2), handles.field.PosZ(1,1,roi(i).height)]);
@@ -2139,6 +2149,14 @@ function [field,procdata]=import_data(procdata,filename,pathname)
             procdata.zmax=max(size(field.uY(1,1,:)));
             procdata.xmax=max(size(field.uY(1,:,1)));
             procdata.ymax=max(size(field.uY(:,1,1)));
+            fprintf('Rearanging the DVC data for display purposes...')
+            field.PosX_c=Correct_DVC_data(field.PosX);
+            field.PosY_c=Correct_DVC_data(field.PosY);
+            field.PosZ_c=Correct_DVC_data(field.PosZ);
+            field.uX_c=Correct_DVC_data(field.uX);
+            field.uY_c=Correct_DVC_data(field.uY);
+            field.uZ_c=Correct_DVC_data(field.uZ);
+            fprintf('done\n')
         elseif vc7_check~=0
             fprintf('~ Loading dataset %s ...',filename);
             [field_got,useless_field]=getVC7data(filename,pathname);
@@ -2155,6 +2173,14 @@ function [field,procdata]=import_data(procdata,filename,pathname)
             procdata.zmax=max(size(field_got.UY(1,1,:)));
             procdata.xmax=max(size(field_got.UY(1,:,1)));
             procdata.ymax=max(size(field_got.UY(:,1,1)));
+            fprintf('Rearanging the DVC data for display purposes...')
+            field.PosX_c=Correct_DVC_data(field.PosX);
+            field.PosY_c=Correct_DVC_data(field.PosY);
+            field.PosZ_c=Correct_DVC_data(field.PosZ);
+            field.uX_c=Correct_DVC_data(field.uX);
+            field.uY_c=Correct_DVC_data(field.uY);
+            field.uZ_c=Correct_DVC_data(field.uZ);
+            fprintf('done\n')
         end
     elseif findstr(procdata.data_type,'FEM')>0
         fullfilename=strcat(pathname,filename);
