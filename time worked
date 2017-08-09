@@ -64,7 +64,13 @@ use todays save copy if want before switch Z on axes
 10:40 - 11:40	Changing the imported DVC data format - create "Correct_DVC_data" and edit "update_figure" & "MHData_type_DVC"
 
 08/08/2017
-12:15 - 
+12:15 - 13:30	Changed all the functions (in Convention_Code) that interact with DVC data to use the correct data for displaying purposes and the the
+				correct data displayed on the x and y axes.
+
+09/08/2017
+13:10 - 14:50	Check that the changes made to Convention_Code with regards to the DVC data's new format work.
+				Change display_operations to display DVC data in the same way.
+				Find working readimx for windows (the version in "old readimx" folder works)
 
 rot90(fliplr(a),1)
 

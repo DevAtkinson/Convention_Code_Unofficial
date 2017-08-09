@@ -77,6 +77,16 @@ function display_operations(procdata_in)
 		else
 			field=field_save;
 		end
+		if procdata.data_type=='DVC'
+			fprintf('Rearanging the DVC data for display purposes...')
+	        field.POSX_c=Correct_DVC_data(field.PosX);
+	        field.POSY_c=Correct_DVC_data(field.PosY);
+	        field.POSZ_c=Correct_DVC_data(field.PosZ);
+	        field.UX_c=Correct_DVC_data(field.uX);
+	        field.UY_c=Correct_DVC_data(field.uY);
+	        field.UZ_c=Correct_DVC_data(field.uZ);
+	        fprintf('done\n')
+	    end
 
 		% axes(axes1)
 		if procdata.data_type=='DIC'
@@ -170,13 +180,13 @@ function display_operations(procdata_in)
 	        axes(axes2)
             switch procdata.Contour
                 case 'uX'
-                    disp2(:,:)=field.UX(procdata.yheight,:,:);
+                    disp2(:,:)=squeeze(field.UX_c(:,procdata.yheight,:));
                     imghandle =imagesc(x_tick,y_tick,disp2);
                 case 'uY'
-                    disp2(:,:)=field.UY(procdata.yheight,:,:);
+                    disp2(:,:)=squeeze(field.UY_c(:,procdata.yheight,:));
                     imghandle =imagesc(x_tick,y_tick,disp2);
                 case 'uZ'
-                    disp2(:,:)=field.UZ(procdata.yheight,:,:);
+                    disp2(:,:)=squeeze(field.UZ_c(:,procdata.yheight,:));
                     imghandle =imagesc(x_tick,y_tick,disp2);
             end
             set(gca,'YDir','normal')
@@ -188,13 +198,13 @@ function display_operations(procdata_in)
             axes(axes3)
             switch procdata.Contour
                 case 'uX'
-                    disp3(:,:)=field.UX(:,procdata.xheight,:);
+                    disp3(:,:)=squeeze(field.UX_c(:,:,procdata.xheight));
                     imghandle =imagesc(x_tick,y_tick,disp3);
                 case 'uY'
-                    disp3(:,:)=field.UY(:,procdata.xheight,:);
+                    disp3(:,:)=squeeze(field.UY_c(:,:,procdata.xheight));
                     imghandle =imagesc(x_tick,y_tick,disp3);
                 case 'uZ'
-                    disp3(:,:)=field.UZ(:,procdata.xheight,:);
+                    disp3(:,:)=squeeze(field.UZ_c(:,:,procdata.xheight));
                     imghandle =imagesc(x_tick,y_tick,disp3);
             end
 	        set(gca,'YDir','normal')
@@ -437,7 +447,7 @@ function [field,procdata]=import_data(procdata,filename,pathname)
 		        field.UY=field_got.UY;
 		        %create a matrix of zeros for uZ since no uZ data will be available in the VC7 file
 		        [r,c]=size(field.UX);
-		        field.uZ=zeros(r,c);
+		        field.UZ=zeros(r,c);
 		        procdata.zheight=1;
 		        procdata.xheight=1;
 		        procdata.yheight=1;
@@ -474,16 +484,41 @@ function [field,procdata]=import_data(procdata,filename,pathname)
 	        fprintf('~ Loading dataset %s ...',filename);
 	        [field,gridspacing]=getDVCdata6(filename,pathname);
 	        fprintf('done\n',filename);
-			procdata.zheight=floor(max(size(field.UY(1,1,:)))/2);
-			procdata.xheight=floor(max(size(field.UY(1,:,1)))/2);
-			procdata.yheight=floor(max(size(field.UY(:,1,1)))/2);
-			procdata.zmax=max(size(field.UY(1,1,:)));
-			procdata.xmax=max(size(field.UY(1,:,1)));
-			procdata.ymax=max(size(field.UY(:,1,1)));
+	        field.UX=field.uX;
+	        field.UY=field.uY;
+	        field.UZ=field.uZ;
+	        field.POSX=field.PosX;
+	        field.POSY=field.PosY;
+	        field.POSZ=field.PosZ;
+	        fprintf('Rearanging the DVC data for display purposes...')
+            field.POSX_c=Correct_DVC_data(field.PosX);
+            field.POSY_c=Correct_DVC_data(field.PosY);
+            field.POSZ_c=Correct_DVC_data(field.PosZ);
+            field.UX_c=Correct_DVC_data(field.uX);
+            field.UY_c=Correct_DVC_data(field.uY);
+            field.UZ_c=Correct_DVC_data(field.uZ);
+            fprintf('done\n')
+
+			procdata.zheight=floor(max(size(field.uY(1,1,:)))/2);
+			procdata.xheight=floor(max(size(field.uY(1,:,1)))/2);
+			procdata.yheight=floor(max(size(field.uY(:,1,1)))/2);
+			procdata.zmax=max(size(field.uY(1,1,:)));
+			procdata.xmax=max(size(field.uY(1,:,1)));
+			procdata.ymax=max(size(field.uY(:,1,1)));
 	    elseif vc7_check~=0
 	        fprintf('~ Loading dataset %s ...',filename);
 	        [field_got,useless_field]=getVC7data(filename,pathname);
 	        fprintf('done\n',filename);
+
+	        fprintf('Rearanging the DVC data for display purposes...')
+            field.POSX_c=Correct_DVC_data(field.PosX);
+            field.POSY_c=Correct_DVC_data(field.PosY);
+            field.POSZ_c=Correct_DVC_data(field.PosZ);
+            field.UX_c=Correct_DVC_data(field.uX);
+            field.UY_c=Correct_DVC_data(field.uY);
+            field.UZ_c=Correct_DVC_data(field.uZ);
+            fprintf('done\n')
+
 	        field.POSX=field_got.POSX;
 	        field.POSY=field_got.POSY;
 	        field.POSZ=field_got.POSZ;
@@ -716,4 +751,13 @@ function procdata=update_masks_from_ref_point(procdata,field)
 			end
 		end
 	end
+end
+
+% Function to create an alternative way for storing the DVC data so that it can be displayed correctly
+function [out]=Correct_DVC_data(it)
+    [y_size,x_size,z_size]=size(it);
+    out=zeros(z_size,y_size,x_size);
+    for i=1:z_size
+        out(i,:,:)=it(:,:,i);
+    end
 end

@@ -315,12 +315,12 @@ function MHData_type_DVC(hObject,~,handles)
             handles.field.uZ=field.UZ;
             %create variables for DVC data to be corrected to a format easier for displaying
             fprintf('Rearanging the DVC data for display purposes...')
-            handles.field.PosX_c=Correct_DVC_data(field.PosX);
-            handles.field.PosY_c=Correct_DVC_data(field.PosY);
-            handles.field.PosZ_c=Correct_DVC_data(field.PosZ);
-            handles.field.uX_c=Correct_DVC_data(field.uX);
-            handles.field.uY_c=Correct_DVC_data(field.uY);
-            handles.field.uZ_c=Correct_DVC_data(field.uZ);
+            handles.field.PosX_c=Correct_DVC_data(field.POSX);
+            handles.field.PosY_c=Correct_DVC_data(field.POSY);
+            handles.field.PosZ_c=Correct_DVC_data(field.POSZ);
+            handles.field.uX_c=Correct_DVC_data(field.UX);
+            handles.field.uY_c=Correct_DVC_data(field.UY);
+            handles.field.uZ_c=Correct_DVC_data(field.UZ);
             fprintf('done\n')
 
             imghandle = imagesc([field.POSX(1,1,1),field.POSX(1,end,1)],[field.POSY(1,1,1),field.POSY(end,1,1)],field.UY(:,:,floor(max(size(field.UY(1,1,:)))/2)));
@@ -2245,6 +2245,7 @@ function [out]=mask2outline(field,handles)
     end
 end
 
+% Function to create an alternative way for storing the DVC data so that it can be displayed correctly
 function [out]=Correct_DVC_data(it)
     [y_size,x_size,z_size]=size(it);
     out=zeros(z_size,y_size,x_size);
