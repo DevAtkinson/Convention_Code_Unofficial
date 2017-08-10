@@ -646,30 +646,58 @@ function procdata=update_masks_from_ref_point(procdata,field)
 					if (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosY')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
-							% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+							procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-z_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
-							% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-y_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
-							% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
-
+						% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-x_ref;
+						end
 					end
 				case 'ellipse'
 					if (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosY')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
-							% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+							procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-z_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
-							% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-y_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
-							% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-x_ref;
+						end
 					end
 				case 'polygon'
 					[r,c]=size(procdata.op(i).coord);
@@ -679,32 +707,62 @@ function procdata=update_masks_from_ref_point(procdata,field)
 							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-y_ref;
 						end
 						% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+							procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-z_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
 						for j=1:r
 							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-x_ref;
 							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-z_ref;
 						end
 						% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-y_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
 						for j=1:r
 							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-y_ref;
 							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-z_ref;
 						end
 						% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-x_ref;
+						end
 					end	
 				case 'point'
 					if (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosY')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
 						% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+							procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-z_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
 						% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-y_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
 						% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-x_ref;
+						end
 					end
 				end
 			elseif procdata.which_operations(i)==1
@@ -714,28 +772,58 @@ function procdata=update_masks_from_ref_point(procdata,field)
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
 						% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+							procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-z_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
 						% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-y_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
 						% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-x_ref;
+						end
 					end
 				case 'ellipse'
 					if (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosY')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
 						% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+							procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-z_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
 						% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-y_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
 						% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-x_ref;
+						end
 					end
 				case 'polygon'
 					[r,c]=size(procdata.op(i).coord);
@@ -745,32 +833,62 @@ function procdata=update_masks_from_ref_point(procdata,field)
 							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-y_ref;
 						end
 						% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+							procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-z_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
 						for j=1:r
 							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-x_ref;
 							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-z_ref;
 						end
 						% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-y_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
 						for j=1:r
 							procdata.op(i).coord(j,1)=procdata.op(i).coord(j,1)-y_ref;
 							procdata.op(i).coord(j,2)=procdata.op(i).coord(j,2)-z_ref;
 						end
 						% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-x_ref;
+						end
 					end
 				case 'point'
 					if (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosY')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-y_ref;
-							% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						% procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosY')
+							procdata.op(i).height=procdata.op(i).height-z_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-z_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-x_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
-							% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						% procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosX')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-y_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-y_ref;
+						end
 					elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
 						procdata.op(i).coord(1)=procdata.op(i).coord(1)-y_ref;
 						procdata.op(i).coord(2)=procdata.op(i).coord(2)-z_ref;
-							% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						% procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						if (procdata.op(ref_check).Xaxis=='PosY')&(procdata.op(ref_check).Yaxis=='PosZ')
+							procdata.op(i).height=procdata.op(i).height-x_ref_ind;
+						else
+							procdata.op(i).height=procdata.op(i).height-x_ref;
+						end
 					end	
 				end
 			end

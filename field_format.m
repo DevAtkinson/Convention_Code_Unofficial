@@ -346,6 +346,16 @@ function [field,procdata,other_fields]=import_data(procdata,filename,pathname)
 			procdata.zmax=max(size(field.uY(1,1,:)));
 			procdata.xmax=max(size(field.uY(1,:,1)));
 			procdata.ymax=max(size(field.uY(:,1,1)));
+
+			fprintf('Rearanging the DVC data for display purposes...')
+            field.PosX_c=Correct_DVC_data(field.PosX);
+            field.PosY_c=Correct_DVC_data(field.PosY);
+            field.PosZ_c=Correct_DVC_data(field.PosZ);
+            field.uX_c=Correct_DVC_data(field.uX);
+            field.uY_c=Correct_DVC_data(field.uY);
+            field.uZ_c=Correct_DVC_data(field.uZ);
+            fprintf('done\n')
+
 	    elseif vc7_check~=0
 	        fprintf('~ Loading dataset %s ...',filename);
 	        [field_got,useless_field]=getVC7data(filename,pathname);
@@ -357,6 +367,16 @@ function [field,procdata,other_fields]=import_data(procdata,filename,pathname)
 	        field.uX=field_got.UX;
 	        field.uY=field_got.UY;
 	        field.uZ=field_got.UZ;
+
+	        fprintf('Rearanging the DVC data for display purposes...')
+            field.PosX_c=Correct_DVC_data(field_got.POSX);
+            field.PosY_c=Correct_DVC_data(field_got.POSY);
+            field.PosZ_c=Correct_DVC_data(field_got.POSZ);
+            field.uX_c=Correct_DVC_data(field_got.UX);
+            field.uY_c=Correct_DVC_data(field_got.UY);
+            field.uZ_c=Correct_DVC_data(field_got.UZ);
+            fprintf('done\n')
+
 	        procdata.zheight=floor(max(size(field_got.UY(1,1,:)))/2);
 	        procdata.xheight=floor(max(size(field_got.UY(1,:,1)))/2);
 	        procdata.yheight=floor(max(size(field_got.UY(:,1,1)))/2);
@@ -428,7 +448,7 @@ function [mask_out]=immask_rect(procdata,ops,field)
 		if (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosY')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
-            dispX(:,:)=field.uX(:,:,procdata.zheight);
+            dispX(:,:)=squeeze(field.uX(:,:,procdata.zheight));
 			imghandle = imagesc(x_tick,y_tick,dispX,'Parent',handles.axes);
 			ch=imrect(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
 			mask=createMask(ch);
@@ -442,10 +462,10 @@ function [mask_out]=immask_rect(procdata,ops,field)
 		elseif (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosZ')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
-            dispY(:,:)=field.uY(procdata.yheight,:,:);
+            dispY(:,:)=squeeze(field.uY_c(:,procdata.yheight,:));
             imghandle =imagesc(x_tick,y_tick,dispY);
             ch=imrect(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
-			mask=createMask(ch);
+			mask=transpose(createMask(ch));
 			close
 			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.ymax
@@ -456,10 +476,10 @@ function [mask_out]=immask_rect(procdata,ops,field)
 		elseif (procdata.op(ops).Xaxis=='PosY')&(procdata.op(ops).Yaxis=='PosZ')
 			x_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
-            dispY(:,:)=field.uY(:,procdata.xheight,:);
+            dispY(:,:)=squeeze(field.uY_c(:,:,procdata.xheight));
             imghandle =imagesc(x_tick,y_tick,dispY);
             ch=imrect(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
-			mask=createMask(ch);
+			mask=transpose(createMask(ch));
 			close
 			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.xmax
@@ -506,7 +526,7 @@ function [mask_out]=immask_ellipse(procdata,ops,field)
 		if (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosY')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
-            dispX(:,:)=field.uX(:,:,procdata.zheight);
+            dispX(:,:)=squeeze(field.uX(:,:,procdata.zheight));
 			imghandle = imagesc(x_tick,y_tick,dispX,'Parent',handles.axes);
 			ch=imellipse(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
 			mask=createMask(ch);
@@ -520,10 +540,10 @@ function [mask_out]=immask_ellipse(procdata,ops,field)
 		elseif (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosZ')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
-            dispY(:,:)=field.uY(procdata.yheight,:,:);
+            dispY(:,:)=squeeze(field.uY_c(:,procdata.yheight,:));
             imghandle =imagesc(x_tick,y_tick,dispY);
             ch=imellipse(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
-			mask=createMask(ch);
+			mask=transpose(createMask(ch));
 			close
 			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.ymax
@@ -534,9 +554,9 @@ function [mask_out]=immask_ellipse(procdata,ops,field)
 		elseif (procdata.op(ops).Xaxis=='PosY')&(procdata.op(ops).Yaxis=='PosZ')
 			x_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
-            dispY(:,:)=field.uY(:,procdata.xheight,:);
+            dispY(:,:)=squeeze(field.uY_c(:,:,procdata.xheight));
             ch=imellipse(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
-			mask=createMask(ch);
+			mask=transpose(createMask(ch));
 			close
 			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.xmax
@@ -593,7 +613,7 @@ function [mask_out]=immask_poly(procdata,ops,field)
 		if (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosY')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
-            dispX(:,:)=field.uX(:,:,procdata.zheight);
+            dispX(:,:)=squeeze(field.uX(:,:,procdata.zheight));
 			imghandle = imagesc(x_tick,y_tick,dispX,'Parent',handles.axes);
 			ch=impoly(handles.axes,procdata.op(ops).coord);
 			mask=createMask(ch);
@@ -607,10 +627,10 @@ function [mask_out]=immask_poly(procdata,ops,field)
 		elseif (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosZ')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
-            dispY(:,:)=field.uY(procdata.yheight,:,:);
+            dispY(:,:)=squeeze(field.uY_c(:,procdata.yheight,:));
             imghandle =imagesc(x_tick,y_tick,dispY);
             ch=impoly(handles.axes,procdata.op(ops).coord);
-			mask=createMask(ch);
+			mask=transpose(createMask(ch));
 			close
 			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.ymax
@@ -621,10 +641,10 @@ function [mask_out]=immask_poly(procdata,ops,field)
 		elseif (procdata.op(ops).Xaxis=='PosY')&(procdata.op(ops).Yaxis=='PosZ')
 			x_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
-            dispY(:,:)=field.uY(:,procdata.xheight,:);
+            dispY(:,:)=squeeze(field.uY_c(:,:,procdata.xheight));
             imghandle = imagesc(x_tick,y_tick,dispY,'Parent',handles.axes);
             ch=impoly(handles.axes,procdata.op(ops).coord);
-			mask=createMask(ch);
+			mask=transpose(createMask(ch));
 			close
 			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.xmax
@@ -843,3 +863,12 @@ function mask_out=fix_mask_size_from_crop(mask,limits,procdata)
 		mask_out=mask(limits(1):limits(2),limits(3):limits(4),limits(5):limits(6));
 	end
 end 
+
+% Function to create an alternative way for storing the DVC data so that it can be displayed correctly
+function [out]=Correct_DVC_data(it)
+    [y_size,x_size,z_size]=size(it);
+    out=zeros(z_size,y_size,x_size);
+    for i=1:z_size
+        out(i,:,:)=it(:,:,i);
+    end
+end
