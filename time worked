@@ -76,7 +76,14 @@ use todays save copy if want before switch Z on axes
 10/08/2017
 13:00 - 14:30	Ensure the Convention_Code is working properly for DVC data
 				Change field_format to work with new corrected DVC data display format - since masks are determined within field_format using imagesc
-16:40 - 		Check that changes made to field format work
+16:40 - 19:30	Check that changes made to field format work
+				Fix display_operations ref points correction function so that it works with DVC data
+				Fix general issues found during testing.
+
+11/08/2017
+11:50 - 12:45	Adding sliders to display_operations for DVC data.
+				(Created the slider callbacks for the xy, xz and yz planes)
+14:40 - 15:00	Finish changing display_operations to work with DVC data with sliders for the heights.
 
 
 rot90(fliplr(a),1)
@@ -99,6 +106,6 @@ create example code to illustrate how to use backend and create masks manually a
 ISSUES:
 If select a roi type then select another without putting the first down then they are both put down a the same time. Also first ones options are different for DVC data.
 When setting mask range for DVC convert whole numbers to height that will actually result and display for user.
-Display_operations needs a slider to set the heights for the axes.
+Display_operations needs a slider to set the heights for the axes == done
 Display_operations - masks are shifted if ref point is applied. == fixed
 Display_operations - masks range possibly not correct if ref point applied == need possibly correct

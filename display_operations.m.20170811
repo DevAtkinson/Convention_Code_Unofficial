@@ -10,7 +10,7 @@ function display_operations(procdata_in)
 	end
 	scrsz = get(0,'ScreenSize');
 	if procdata.data_type=='DIC'
-		handles.fig = figure('MenuBar','None','Position',[(scrsz(3)-300)/2 (scrsz(4)-600)/2 900 600]);
+		handles.fig = figure('MenuBar','None','Position',[(scrsz(3)-300)/2 (scrsz(4)-600)/2 800 600]);
 		set(handles.fig, 'Name', 'Dipslay operations');
 		axes1=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[70,70,450,450]);
 
@@ -32,10 +32,10 @@ function display_operations(procdata_in)
 		ch_data=uicontrol('Style','checkbox','string','Display processed data','Position',[550,530,200,20],'Callback',@update_fig);
 	elseif procdata.data_type=='DVC'
 		handles.fig = figure('MenuBar','None','Position',[(scrsz(3)-300)/2 (scrsz(4)-600)/2 800 800]);
-		set(handles.fig, 'Name', 'Display operations');
-		axes1=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[90,70,300,300]);
-		axes2=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[90,440,300,300]);
-		axes3=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[480,440,300,300]);
+		set(handles.fig, 'Name', 'Dipslay operations');
+		axes1=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[70,70,300,300]);
+		axes2=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[70,440,300,300]);
+		axes3=axes('Parent',handles.fig,'Layer' ,'Top','Units','pixels','Position',[440,440,300,300]);
 		[field,procdata]=import_data(procdata,procdata.filename,procdata.pathname);
 		field_save=field;
 		for i=1:procdata.current
@@ -45,59 +45,7 @@ function display_operations(procdata_in)
 		uicontrol('Style','text','string','Use ctrl to select multiple operations:','Position',[550,300,200,20]);
 		ch_mask=uicontrol('Style','checkbox','String','Display masks','Position',[550,330,200,20],'Callback',@update_fig);
 		ch_data=uicontrol('Style','checkbox','string','Display processed data','Position',[550,350,200,20],'Callback',@update_fig);
-
-		slider_xy=uicontrol('Style','slider','Position',[20,70,20,300],'min',1,'max',procdata.zmax,'Value',procdata.zheight,'Callback',@Slider_callback_xy);
-        textbox_xy=uicontrol('Style','text','Position',[5,50,60,20],'String',num2str(field.POSZ(1,1,procdata.zheight)),'ToolTipString',sprintf('The currently viewed plane''s value'));
-        textbox2_xy=uicontrol('Style','text','Position',[5,30,60,20],'String',sprintf('%d/%d',procdata.zheight,procdata.zmax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
-        set(slider_xy,'SliderStep',[1 1]/(procdata.zmax-1));
-
-        slider_xz=uicontrol('Style','slider','Position',[20,440,20,300],'min',1,'max',procdata.ymax,'Value',procdata.yheight,'Callback',@Slider_callback_xz);
-        textbox_xz=uicontrol('Style','text','Position',[5,420,60,20],'String',num2str(field.POSY(1,1,procdata.yheight)),'ToolTipString',sprintf('The currently viewed plane''s value'));
-        textbox2_xz=uicontrol('Style','text','Position',[5,400,60,20],'String',sprintf('%d/%d',procdata.yheight,procdata.ymax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
-        set(slider_xz,'SliderStep',[1 1]/(procdata.ymax-1));
-
-        slider_yz=uicontrol('Style','slider','Position',[410,440,20,300],'min',1,'max',procdata.xmax,'Value',procdata.xheight,'Callback',@Slider_callback_yz);
-        textbox_yz=uicontrol('Style','text','Position',[395,420,60,20],'String',num2str(field.POSX(1,1,procdata.xheight)),'ToolTipString',sprintf('The currently viewed plane''s value'));
-        textbox2_yz=uicontrol('Style','text','Position',[395,400,60,20],'String',sprintf('%d/%d',procdata.xheight,procdata.xmax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
-        set(slider_yz,'SliderStep',[1 1]/(procdata.xmax-1));
 	end
-
-	%function to allow the slider to change the height viewed with regards to DVC data in xy plane
-	function Slider_callback_xy(hObject,eventdata,handles)
-	    handles=guidata(hObject);
-	    value=floor(get(slider_xy,'Value'));
-	    set(slider_xy,'Value',value);
-        procdata.zheight=value;
-        set(textbox_xy,'string',num2str(field.POSZ(1,1,value)));
-        set(textbox2_xy,'string',sprintf('%d/%d',procdata.zheight,procdata.zmax))
-	    update_fig(hObject,eventdata,handles)
-	    guidata(hObject, handles);
-	end
-
-	%function to allow the slider to change the height viewed with regards to DVC data in xz plane
-	function Slider_callback_xz(hObject,eventdata,handles)
-	    handles=guidata(hObject);
-	    value=floor(get(slider_xz,'Value'));
-	    set(slider_xz,'Value',value);
-        procdata.yheight=value;
-        set(textbox_xz,'string',num2str(field.POSY(value,1,1)));
-        set(textbox2_xz,'string',sprintf('%d/%d',procdata.yheight,procdata.ymax))
-	    update_fig(hObject,eventdata,handles)
-	    guidata(hObject, handles);
-	end
-
-	%function to allow the slider to change the height viewed with regards to DVC data in yz plane
-	function Slider_callback_yz(hObject,eventdata,handles)
-	    handles=guidata(hObject);
-	    value=floor(get(slider_yz,'Value'));
-	    set(slider_yz,'Value',value);
-        procdata.xheight=value;
-        set(textbox_yz,'string',num2str(field.POSX(1,value,1)));
-        set(textbox2_yz,'string',sprintf('%d/%d',procdata.xheight,procdata.xmax))
-	    update_fig(hObject,eventdata,handles)
-	    guidata(hObject, handles);
-	end
-
 	% this function updates the figures to display the data with the selected options
 	function update_fig(hObject,eventdata,handles)
 		if procdata.data_type=='DIC'
@@ -218,13 +166,13 @@ function display_operations(procdata_in)
             axes(axes1)
             switch procdata.Contour
                 case 'uX'
-                    disp1(:,:)=squeeze(field.UX(:,:,procdata.zheight));
+                    disp1(:,:)=field.UX(:,:,procdata.zheight);
                     imghandle =imagesc(x_tick,y_tick,disp1);
                 case 'uY'
-                    disp1(:,:)=squeeze(field.UY(:,:,procdata.zheight));
+                    disp1(:,:)=field.UY(:,:,procdata.zheight);
                     imghandle =imagesc(x_tick,y_tick,disp1);
                 case 'uZ'
-                    disp1(:,:)=squeeze(field.UZ(:,:,procdata.zheight));
+                    disp1(:,:)=field.UZ(:,:,procdata.zheight);
                     imghandle =imagesc(x_tick,y_tick,disp1);
             end
             x_tick=sort([field.POSX(1,1,1),field.POSX(1,end,1)]);

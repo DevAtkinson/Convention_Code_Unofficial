@@ -356,7 +356,7 @@ end
 
 %function to allow the slider to change the height viewed with regards to DVC data
 function Slider_callback(hObject,eventdata,handles)
-    handles=guidata(hObject);py
+    handles=guidata(hObject);
     value=floor(get(handles.uistuff.slider,'value'));
     set(handles.uistuff.slider,'Value',value);
     if (handles.procdata.Xaxis=='PosX')&(handles.procdata.Yaxis=='PosY')
