@@ -1,38 +1,38 @@
 01/02/2017
-9:43-9:50	try use linux readimx - remove internal addpaths - get invalid mex file error
+9:43-9:50		try use linux readimx - remove internal addpaths - get invalid mex file error
 11:10 - 12:30	try to fix readimx problem in linux. Start working on being able to load old masksing file and being able to edit it
-		found error in display operations where old masks are visible if cropping
-		found a way to edit the masks loaded from a GUI output file (created function MHData_edit_masks)-
+				found error in display operations where old masks are visible if cropping
+				found a way to edit the masks loaded from a GUI output file (created function MHData_edit_masks)-
 15:24 - 15:54	implementing method to edit old masks for DIC data & DVC data
 17:00 - 18:11	continue implementing method to edit old masks for DVC
-		slider does not work for old mask files for DVC data
-		for DVC opens a new instance of GUI that cant use any of its callbacks/menu drop downs
+				slider does not work for old mask files for DVC data
+				for DVC opens a new instance of GUI that cant use any of its callbacks/menu drop downs
 
 02/02/2017	
 15:33 - 18:02	Continue to work on getting DVC data to work when importing created mask files
-		Determined issue - roi is not being passed from the callback that loads the old mask file to the other callbacks
-		Fixed issue of saving the slider and its textbox in procdata - was causing DVC data loaded from an old mask file to create a new image
-		DVC now importing correctly but slider has more increments than there are rows/columns
-		fixed slider increment issue using SliderStep option
-		Ensure that the slider can only have whole number values by flooring the value input and setting that as the new slider value
+				Determined issue - roi is not being passed from the callback that loads the old mask file to the other callbacks
+				Fixed issue of saving the slider and its textbox in procdata - was causing DVC data loaded from an old mask file to create a new image
+				DVC now importing correctly but slider has more increments than there are rows/columns
+				fixed slider increment issue using SliderStep option
+				Ensure that the slider can only have whole number values by flooring the value input and setting that as the new slider value
 
 03/02/2017
 07:56 - 11:23	Start writing down what tasks should be completed and which features should be added
-			getting readimx.mexa64 file to work in linux - not working yet 30 min
-			add a string box under the slider for DVC data that shows which column is being viewed out of the number of columbs that exist
-			fix MHGraph_Zheight.. so that they update the textboxes under the slider
-			add tooltipstrings to these textboxes and align the textboxes
-			update textboxes when change height using gui menu instead of slider
-			5 min Lucas showed me how to use the 3D printer
-			10 min break
-			add function MHData_close_field to output a file containing the processed displacement fields
-			make the load mask function more robust so an error does not result if a file is not selected
-			do the same for all the data loading functions
+				getting readimx.mexa64 file to work in linux - not working yet 30 min
+				add a string box under the slider for DVC data that shows which column is being viewed out of the number of columbs that exist
+				fix MHGraph_Zheight.. so that they update the textboxes under the slider
+				add tooltipstrings to these textboxes and align the textboxes
+				update textboxes when change height using gui menu instead of slider
+				5 min Lucas showed me how to use the 3D printer
+				10 min break
+				add function MHData_close_field to output a file containing the processed displacement fields
+				make the load mask function more robust so an error does not result if a file is not selected
+				do the same for all the data loading functions
 
 05/02/2017
 10:41 - 13:50	Figuring out how to use hatchfill2 to hatch rectangles and polygons
-			Use contour with hatchfill2 to hatch data in function MHOptions_hatch
-			Figure out how to apply hatch but still display displacement data as it would usually look (contourf changes colours of displacement data) - working for DIC
+				Use contour with hatchfill2 to hatch data in function MHOptions_hatch
+				Figure out how to apply hatch but still display displacement data as it would usually look (contourf changes colours of displacement data) - working for DIC
 
 14:37 - 15:41	Change MHOptions_hatch to work with DVC data
 				found out matrices displayed for DVC data must be rotated when not on the PosX and PosY orientation
@@ -84,8 +84,13 @@ use todays save copy if want before switch Z on axes
 11:50 - 12:45	Adding sliders to display_operations for DVC data.
 				(Created the slider callbacks for the xy, xz and yz planes)
 14:40 - 15:00	Finish changing display_operations to work with DVC data with sliders for the heights.
+17:00 - 21:25	Checking that field_format processes DVC data correctly
+				Found issue with field_format way of dealing with masks and fixed
+				Fixing issue with cropping of DVC data in field_format
+				20 min break
+				Fixing issues with cropping of DVC data in display_operations
 
-
+Notes:
 rot90(fliplr(a),1)
 
 
@@ -106,6 +111,11 @@ create example code to illustrate how to use backend and create masks manually a
 ISSUES:
 If select a roi type then select another without putting the first down then they are both put down a the same time. Also first ones options are different for DVC data.
 When setting mask range for DVC convert whole numbers to height that will actually result and display for user.
+If a crop is applied that removed data which would have been masked (or had another function applied to it) the program needs to be able to handle it
+
+
+
+
 Display_operations needs a slider to set the heights for the axes == done
 Display_operations - masks are shifted if ref point is applied. == fixed
-Display_operations - masks range possibly not correct if ref point applied == need possibly correct
+Display_operations - masks range possibly not correct if ref point applied == not true - masks are independent of POS matrices.

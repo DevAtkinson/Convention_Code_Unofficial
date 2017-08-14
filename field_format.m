@@ -55,7 +55,7 @@ function field=field_format(procdata_in,varargin)
 	%_____________________________load data
 	%check if file name contains .dat file extension
 	[field,procdata]=import_data(procdata,filename,pathname);
-
+	field.crop.check='n';
 	%____________________________manipulate fields
 
 	mask_check=0;
@@ -98,6 +98,29 @@ function field=field_format(procdata_in,varargin)
 						[uselssfield,limits]=apply_crop(mask,field,procdata);
 					end
 				end
+		end
+	end
+
+	% correct operations height in the case of a crop
+	if (procdata.data_type=='DVC')&(exist('uselssfield','var'))
+		[y_size,x_size,z_size]=size(uselssfield.PosX);
+		for i=1:procdata.current
+			if (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosY')
+				procdata.op(i).height=procdata.op(i).height - uselssfield.crop.z;
+				if (procdata.op(i).height<1)|(procdata.op(i).height>z_size)
+					does(i)=0;
+				end
+			elseif (procdata.op(i).Xaxis=='PosX')&(procdata.op(i).Yaxis=='PosZ')
+				procdata.op(i).height=procdata.op(i).height - uselssfield.crop.y;
+				if (procdata.op(i).height<1)|(procdata.op(i).height>y_size)
+					does(i)=0;
+				end
+			elseif (procdata.op(i).Xaxis=='PosY')&(procdata.op(i).Yaxis=='PosZ')
+				procdata.op(i).height=procdata.op(i).height - uselssfield.crop.x;
+				if (procdata.op(i).height<1)|(procdata.op(i).height>x_size)
+					does(i)=0;
+				end
+			end				
 		end
 	end
 
@@ -445,18 +468,20 @@ function [mask_out]=immask_rect(procdata,ops,field)
 	elseif findstr(procdata.data_type,'DVC')>0
 		handles.fig=figure('MenuBar','None');
 		handles.axes = axes('Parent',handles.fig ,'Layer' ,'Top');
+		mask_out_temp=zeros(procdata.zmax,procdata.ymax,procdata.xmax);
 		if (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosY')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
             dispX(:,:)=squeeze(field.uX(:,:,procdata.zheight));
 			imghandle = imagesc(x_tick,y_tick,dispX,'Parent',handles.axes);
+			set(gca,'YDir','normal')
 			ch=imrect(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
 			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.zmax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(:,:,i)=mask;
+					mask_out_temp(i,:,:)=mask;
 				end
 			end
 		elseif (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosZ')
@@ -464,13 +489,14 @@ function [mask_out]=immask_rect(procdata,ops,field)
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
             dispY(:,:)=squeeze(field.uY_c(:,procdata.yheight,:));
             imghandle =imagesc(x_tick,y_tick,dispY);
+            set(gca,'YDir','normal')
             ch=imrect(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
-			mask=transpose(createMask(ch));
+			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.ymax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(i,:,:)=mask;
+					mask_out_temp(:,i,:)=mask;
 				end
 			end
 		elseif (procdata.op(ops).Xaxis=='PosY')&(procdata.op(ops).Yaxis=='PosZ')
@@ -478,24 +504,27 @@ function [mask_out]=immask_rect(procdata,ops,field)
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
             dispY(:,:)=squeeze(field.uY_c(:,:,procdata.xheight));
             imghandle =imagesc(x_tick,y_tick,dispY);
+            set(gca,'YDir','normal')
             ch=imrect(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
-			mask=transpose(createMask(ch));
+			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.xmax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(:,i,:)=mask;
+					mask_out_temp(:,:,i)=mask;
 				end
 			end
 		end
 		if procdata.op(ops).clude=='include'
-			mask_out=double(mask_out);
+			mask_out=double(mask_out_temp);
 			mask_out(mask_out==0)=NaN;
+			mask_out=ReCorrect_DVC_data(mask_out);
 		end
 		if procdata.op(ops).clude=='exclude'
-			mask_out=not(mask_out);
+			mask_out=not(mask_out_temp);
 			mask_out=double(mask_out);
 			mask_out(mask_out==0)=NaN;
+			mask_out=ReCorrect_DVC_data(mask_out);
 		end
 	end
 end
@@ -523,18 +552,20 @@ function [mask_out]=immask_ellipse(procdata,ops,field)
 	elseif findstr(procdata.data_type,'DVC')>0
 		handles.fig=figure('MenuBar','None');
 		handles.axes = axes('Parent',handles.fig ,'Layer' ,'Top');
+		mask_out_temp=zeros(procdata.zmax,procdata.ymax,procdata.xmax);
 		if (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosY')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
             dispX(:,:)=squeeze(field.uX(:,:,procdata.zheight));
 			imghandle = imagesc(x_tick,y_tick,dispX,'Parent',handles.axes);
+			set(gca,'YDir','normal')
 			ch=imellipse(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
 			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.zmax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(:,:,i)=mask;
+					mask_out_temp(i,:,:)=mask;
 				end
 			end
 		elseif (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosZ')
@@ -542,37 +573,44 @@ function [mask_out]=immask_ellipse(procdata,ops,field)
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
             dispY(:,:)=squeeze(field.uY_c(:,procdata.yheight,:));
             imghandle =imagesc(x_tick,y_tick,dispY);
+            set(gca,'YDir','normal')
             ch=imellipse(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
-			mask=transpose(createMask(ch));
+			% mask=transpose(createMask(ch));
+			% mask=Recorrect_DVC_mask(createMask(ch));
+			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.ymax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(i,:,:)=mask;
+					mask_out_temp(:,i,:)=mask;
 				end
 			end
 		elseif (procdata.op(ops).Xaxis=='PosY')&(procdata.op(ops).Yaxis=='PosZ')
 			x_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
             dispY(:,:)=squeeze(field.uY_c(:,:,procdata.xheight));
+            imghandle=imagesc(x_tick,y_tick,dispY)
+            set(gca,'YDir','normal')
             ch=imellipse(handles.axes,[procdata.op(ops).coord(1), procdata.op(ops).coord(2), procdata.op(ops).coord(3), procdata.op(ops).coord(4)]);
-			mask=transpose(createMask(ch));
+			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.xmax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(:,i,:)=mask;
+					mask_out_temp(:,:,i)=mask;
 				end
 			end
 		end
 		if procdata.op(ops).clude=='include'
-			mask_out=double(mask_out);
+			mask_out=double(mask_out_temp);
 			mask_out(mask_out==0)=NaN;
+			mask_out=ReCorrect_DVC_data(mask_out);
 		end
 		if procdata.op(ops).clude=='exclude'
-			mask_out=not(mask_out);
+			mask_out=not(mask_out_temp);
 			mask_out=double(mask_out);
 			mask_out(mask_out==0)=NaN;
+			mask_out=ReCorrect_DVC_data(mask_out);
 		end
 	end
 end
@@ -610,18 +648,20 @@ function [mask_out]=immask_poly(procdata,ops,field)
 		% end
 		handles.fig=figure('MenuBar','None');
 		handles.axes = axes('Parent',handles.fig ,'Layer' ,'Top');
+		mask_out_temp=zeros(procdata.zmax,procdata.ymax,procdata.xmax);
 		if (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosY')
 			x_tick=sort([field.PosX(1,1,1),field.PosX(1,end,1)]);
             y_tick=sort([field.PosY(1,1,1),field.PosY(end,1,1)]);
             dispX(:,:)=squeeze(field.uX(:,:,procdata.zheight));
 			imghandle = imagesc(x_tick,y_tick,dispX,'Parent',handles.axes);
+			set(gca,'YDir','normal')
 			ch=impoly(handles.axes,procdata.op(ops).coord);
 			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.zmax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(:,:,i)=mask;
+					mask_out_temp(i,:,:)=mask;
 				end
 			end
 		elseif (procdata.op(ops).Xaxis=='PosX')&(procdata.op(ops).Yaxis=='PosZ')
@@ -629,13 +669,14 @@ function [mask_out]=immask_poly(procdata,ops,field)
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
             dispY(:,:)=squeeze(field.uY_c(:,procdata.yheight,:));
             imghandle =imagesc(x_tick,y_tick,dispY);
+            set(gca,'YDir','normal')
             ch=impoly(handles.axes,procdata.op(ops).coord);
-			mask=transpose(createMask(ch));
+			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.ymax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(i,:,:)=mask;
+					mask_out_temp(:,i,:)=mask;
 				end
 			end
 		elseif (procdata.op(ops).Xaxis=='PosY')&(procdata.op(ops).Yaxis=='PosZ')
@@ -643,24 +684,27 @@ function [mask_out]=immask_poly(procdata,ops,field)
             y_tick=sort([field.PosZ(1,1,1),field.PosZ(1,1,end)]);
             dispY(:,:)=squeeze(field.uY_c(:,:,procdata.xheight));
             imghandle = imagesc(x_tick,y_tick,dispY,'Parent',handles.axes);
+            set(gca,'YDir','normal')
             ch=impoly(handles.axes,procdata.op(ops).coord);
-			mask=transpose(createMask(ch));
+			mask=createMask(ch);
 			close
-			mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
+			% mask_out=ones(procdata.ymax,procdata.xmax,procdata.zmax);
 			for i=1:procdata.xmax
 				if (i>=procdata.op(ops).mask_range(1))&(i<=procdata.op(ops).mask_range(2))
-					mask_out(:,i,:)=mask;
+					mask_out_temp(:,:,i)=mask;
 				end
 			end
 		end
 		if procdata.op(ops).clude=='include'
-			mask_out=double(mask_out);
+			mask_out=double(mask_out_temp);
 			mask_out(mask_out==0)=NaN;
+			mask_out=ReCorrect_DVC_data(mask_out);
 		end
 		if procdata.op(ops).clude=='exclude'
-			mask_out=not(mask_out);
+			mask_out=not(mask_out_temp);
 			mask_out=double(mask_out);
 			mask_out(mask_out==0)=NaN;
+			mask_out=ReCorrect_DVC_data(mask_out);
 		end
 	end
 end
@@ -714,6 +758,7 @@ end
 
 % function to crop the fields according to a crop input
 function [field,limits]=apply_crop(mask,field,procdata)
+	field.crop.check='y';
 	switch procdata.data_type
 	case 'DIC'
 		[r,c]=size(field.uX);
@@ -850,6 +895,15 @@ function [field,limits]=apply_crop(mask,field,procdata)
 		field.PosX=field_temp.PosX(r_top:r_bot,c_top:c_bot,v_top:v_bot);
 		field.PosY=field_temp.PosY(r_top:r_bot,c_top:c_bot,v_top:v_bot);
 		field.PosZ=field_temp.PosZ(r_top:r_bot,c_top:c_bot,v_top:v_bot);
+		% field.PosX_c=Correct_DVC_data(field.PosX);
+		% field.PosY_c=Correct_DVC_data(field.PosY);
+		% field.PosZ_c=Correct_DVC_data(field.PosZ);
+		% field.uX_c=Correct_DVC_data(field.uX);
+		% field.uY_c=Correct_DVC_data(field.uY);
+		% field.uZ_c=Correct_DVC_data(field.uZ);
+        field.crop.y=r_top;
+        field.crop.x=c_top;
+        field.crop.z=v_top;
 		limits=[r_top,r_bot,c_top,c_bot,v_top,v_bot];
 	end
 end
@@ -872,3 +926,22 @@ function [out]=Correct_DVC_data(it)
         out(i,:,:)=it(:,:,i);
     end
 end
+
+% Function to undo the alternative way of storing DVC data
+function [out]=ReCorrect_DVC_data(it)
+    [z_size,y_size,x_size]=size(it);
+    out=zeros(y_size,x_size,z_size);
+    for i=1:z_size
+        out(:,:,i)=it(i,:,:);
+    end
+end
+
+% function [out]=Recorrect_DVC_mask(it)
+% 	[x_size,y_size]=size(it);
+% 	out=zeros(y_size,x_size);
+% 	for i=1:x_size
+% 		for j=1:y_size
+% 			out(j,i)=it(i,j);
+% 		end
+% 	end
+% end
