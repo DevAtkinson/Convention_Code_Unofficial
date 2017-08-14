@@ -90,6 +90,9 @@ use todays save copy if want before switch Z on axes
 				20 min break
 				Fixing issues with cropping of DVC data in display_operations
 
+14/08/2017
+12:15 - 13:00	Fix issues with cropping DVC data in display_operations
+
 Notes:
 rot90(fliplr(a),1)
 

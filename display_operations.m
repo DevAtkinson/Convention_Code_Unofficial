@@ -74,9 +74,7 @@ function display_operations(procdata_in)
 	function Slider_callback_xy(hObject,eventdata,handles)
 	    handles=guidata(hObject);
 	    value=floor(get(slider_xy,'Value'));
-	    set(slider_xy,'Value',value);
         procdata.zheight=value;
-        zval=procdata.zheight
         set(textbox_xy,'string',num2str(field.POSZ(1,1,value)));
         set(textbox2_xy,'string',sprintf('%d/%d',procdata.zheight,procdata.zmax))
 	    update_fig(hObject,eventdata,handles)
@@ -86,8 +84,8 @@ function display_operations(procdata_in)
 	%function to allow the slider to change the height viewed with regards to DVC data in xz plane
 	function Slider_callback_xz(hObject,eventdata,handles)
 	    handles=guidata(hObject);
+	    check_val=get(slider_xz,'value')
 	    value=floor(get(slider_xz,'Value'));
-	    set(slider_xz,'Value',value);
         procdata.yheight=value;
         set(textbox_xz,'string',num2str(field.POSY(value,1,1)));
         set(textbox2_xz,'string',sprintf('%d/%d',procdata.yheight,procdata.ymax))
@@ -99,7 +97,6 @@ function display_operations(procdata_in)
 	function Slider_callback_yz(hObject,eventdata,handles)
 	    handles=guidata(hObject);
 	    value=floor(get(slider_yz,'Value'));
-	    set(slider_yz,'Value',value);
         procdata.xheight=value;
         set(textbox_yz,'string',num2str(field.POSX(1,value,1)));
         set(textbox2_yz,'string',sprintf('%d/%d',procdata.xheight,procdata.xmax))
@@ -138,7 +135,7 @@ function display_operations(procdata_in)
 			field=field_format(procdata,'which operations',does);
 			%adjust the heights in the case of cropping
 			if field.crop.check=='y'
-				xval1=procdata.zheight
+				xval1=procdata.yheight
 				% procdata.yheight=procdata.yheight_locked-field.crop.y;
 				% procdata.xheight=procdata.xheight_locked-field.crop.x;
 				% procdata.zheight=procdata.zheight_locked-field.crop.z;
@@ -152,7 +149,7 @@ function display_operations(procdata_in)
 				procdata.zmax=z_size;
 				procdata.ymax=y_size;
 				procdata.xmax=x_size;
-				xval2=procdata.zheight
+				xval2=procdata.yheight
 				if procdata.yheight<1
 					procdata.yheight=1;
 				elseif procdata.yheight>y_size
@@ -168,7 +165,7 @@ function display_operations(procdata_in)
 				elseif procdata.zheight>z_size
 					procdata.zheight=z_size;				
 				end
-				xval3=procdata.zheight
+				xval3=procdata.yheight
 				% set(slider_xy,'value',procdata.zheight,'max',z_size)
 				% set(slider_xz,'value',procdata.yheight,'max',y_size)
 				% set(slider_yz,'value',procdata.xheight,'max',x_size)
@@ -176,40 +173,55 @@ function display_operations(procdata_in)
 				set(textbox2_xz,'string',sprintf('%d/%d',procdata.yheight,procdata.ymax))
 				set(textbox2_yz,'string',sprintf('%d/%d',procdata.xheight,procdata.xmax))
 
+
 				x_current=get(slider_yz,'value');
 				y_current=get(slider_xz,'value');
 				z_current=get(slider_xy,'value');
-				if x_current>x_size
-					set(slider_yz,'value',procdata.xheight,'max',x_size)
-				else
-					set(slider_yz,'max',x_size)
-				end
-				if y_current>y_size
-					set(slider_xz,'value',procdata.yheight,'max',y_size)
-				else
-					set(slider_xz,'max',y_size)
-				end
-				if z_current>z_size
-					set(slider_xy,'value',procdata.zheight,'max',z_size)
-				else
-					set(slider_xy,'max',z_size)
-				end
+
+				set(slider_yz,'value',procdata.xheight,'max',x_size,'Sliderstep',[1/(x_size-1) 1])
+				set(textbox_yz,'String',num2str(field.POSX(1,procdata.xheight,1)))
+				set(slider_xz,'value',procdata.yheight,'max',y_size,'SliderStep',[1/(y_size-1) 1])
+				set(textbox_xz,'String',num2str(field.POSY(procdata.yheight,1,1)))
+				set(slider_xy,'value',procdata.zheight,'max',z_size,'SliderStep',[1/(z_size-1) 1])
+				set(textbox_xy,'String',num2str(field.POSZ(1,1,procdata.zheight)))
+
+
+				% if x_current>x_size
+				% 	set(slider_yz,'value',procdata.xheight,'max',x_size,'Sliderstep',[1/(x_size-1) 1])
+				% 	set(textbox_yz,'String',num2str(field.POSX(1,procdata.xheight,1)))
+				% else
+				% 	set(slider_yz,'max',x_size,'Sliderstep',[1/(x_size-1) 1])
+				% 	set(textbox_yz,'String',num2str(field.POSX(1,procdata.xheight,1)))
+				% end
+				% if y_current>y_size
+				% 	set(slider_xz,'value',procdata.yheight,'max',y_size,'SliderStep',[1/(y_size-1) 1])
+				% 	set(textbox_xz,'String',num2str(field.POSY(procdata.yheight,1,1)))
+				% else
+				% 	set(slider_xz,'max',y_size,'SliderStep',[1/(y_size-1) 1])
+				% 	set(textbox_xz,'String',num2str(field.POSY(procdata.yheight,1,1)))
+				% end
+				% if z_current>z_size
+				% 	set(slider_xy,'value',procdata.zheight,'max',z_size,'SliderStep',[1/(z_size-1) 1])
+				% 	set(textbox_xy,'String',num2str(field.POSZ(1,1,procdata.zheight)))
+				% else
+				% 	set(slider_xy,'max',z_size,'SliderStep',[1/(z_size-1) 1])
+				% 	set(textbox_xy,'String',num2str(field.POSZ(1,1,procdata.zheight)))
+				% end
+
+
 				% set(slider_xy,'max',z_size)
 				% set(slider_xz,'max',y_size)
 				% set(slider_yz,'max',x_size)
 				% set(textbox2_xy,'string',sprintf('%d/%d',procdata.zheight,procdata.zmax))
 				% set(textbox2_xz,'string',sprintf('%d/%d',procdata.yheight,procdata.ymax))
 				% set(textbox2_yz,'string',sprintf('%d/%d',procdata.xheight,procdata.xmax))
-				xval4=procdata.zheight
+				xval4=procdata.yheight
 			end
 		else
 			field=field_save;
 			%not sure if these are applicable here
 			%adjust the heights in the case of cropping
 			if field.crop.check=='y'
-				% procdata.yheight=procdata.yheight_locked-field.crop.y;
-				% procdata.xheight=procdata.xheight_locked-field.crop.x;
-				% procdata.zheight=procdata.zheight_locked-field.crop.z;
 				procdata.yheight=procdata.yheight-field.crop.y+procdata.crop.yprev;
 				procdata.xheight=procdata.xheight-field.crop.x+procdata.crop.xprev;
 				procdata.zheight=procdata.zheight-field.crop.z+procdata.crop.zprev;
@@ -235,12 +247,20 @@ function display_operations(procdata_in)
 				elseif procdata.zheight>z_size
 					procdata.zheight=z_size;				
 				end
-				set(slider_xy,'value',procdata.zheight,'max',z_size)
-				set(slider_xz,'value',procdata.yheight,'max',y_size)
-				set(slider_yz,'value',procdata.xheight,'max',x_size)
 				set(textbox2_xy,'string',sprintf('%d/%d',procdata.zheight,procdata.zmax))
 				set(textbox2_xz,'string',sprintf('%d/%d',procdata.yheight,procdata.ymax))
 				set(textbox2_yz,'string',sprintf('%d/%d',procdata.xheight,procdata.xmax))
+
+				x_current=get(slider_yz,'value');
+				y_current=get(slider_xz,'value');
+				z_current=get(slider_xy,'value');
+
+				set(slider_yz,'value',procdata.xheight,'max',x_size,'Sliderstep',[1/(x_size-1) 1])
+				set(textbox_yz,'String',num2str(field.POSX(1,procdata.xheight,1)))
+				set(slider_xz,'value',procdata.yheight,'max',y_size,'SliderStep',[1/(y_size-1) 1])
+				set(textbox_xz,'String',num2str(field.POSY(procdata.yheight,1,1)))
+				set(slider_xy,'value',procdata.zheight,'max',z_size,'SliderStep',[1/(z_size-1) 1])
+				set(textbox_xy,'String',num2str(field.POSZ(1,1,procdata.zheight)))
 			end
 		end
 		if procdata.data_type=='DVC'
