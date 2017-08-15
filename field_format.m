@@ -211,10 +211,19 @@ function field=field_format(procdata_in,varargin)
 				switch procdata.op(i).shape
 				case 'rectangle'
 					mask=immask_rect(procdata,i,field);
-					[r1,c1]=size(field.uX);
+					if procdata.data_type=='DIC'
+						[r1,c1]=size(field.uX);
+					elseif procdata.data_type=='DVC'
+						[r1,c1,k1]=size(field.uX);
+					end
 					[field,limits]=apply_crop(mask,field,procdata);
-					[r2,c2]=size(field.uX);
-					fprintf('~ The matrix of data has been reduced from a %d by %d to a %d by %d matrix\n',r1,c1,r2,c2);
+					if procdata.data_type=='DIC'
+						[r2,c2]=size(field.uX);
+						fprintf('~ The matrix of data has been reduced from a %d by %d to a %d by %d matrix\n',r1,c1,r2,c2);
+					elseif procdata.data_type=='DVC'
+						[r2,c2,k2]=size(field.uX);
+						fprintf('~ The matrix of data has been reduced from a %d by %d by %d to a %d by %d by %d matrix\n',r1,c1,k1,r2,c2,k2);
+					end
 					mask_check2(i)=0;
 				end
 			end

@@ -29,13 +29,6 @@ function display_operations(procdata_in)
 		lb=uicontrol('Style','listbox','Max',5,'Min',0,'string',string,'Position',[550,15,200,450],'Callback',@update_fig);
 		uicontrol('Style','text','string','Use ctrl to select multiple operations:','Position',[550,470,200,20]);
 		ch_mask=uicontrol('Style','checkbox','String','Display masks','Position',[550,500,200,20],'Callback',@update_fig);
-		%create buttons to control what displacement data is displayed
-		button_x=uicontrol('Style','pushbutton','Position',[550,355,30,20],'string','UX','Callback',@button_x_callback);
-        button_y=uicontrol('Style','pushbutton','Position',[590,355,30,20],'string','UY','Callback',@button_y_callback);
-        button_z=uicontrol('Style','pushbutton','Position',[630,355,30,20],'string','UZ','Callback',@button_z_callback);
-        button_text=uicontrol('Style','text','string','Displaying UY','Position',[660,350,100,20]);
-        display_contour='uY';
-
 		% ch_data=uicontrol('Style','checkbox','string','Display processed data','Position',[550,530,200,20],'Callback',@update_fig);
 	elseif procdata.data_type=='DVC'
 		handles.fig = figure('MenuBar','None','Position',[(scrsz(3)-300)/2 (scrsz(4)-600)/2 800 800]);
@@ -53,26 +46,20 @@ function display_operations(procdata_in)
 		ch_mask=uicontrol('Style','checkbox','String','Display masks','Position',[550,330,200,20],'Callback',@update_fig);
 		% ch_data=uicontrol('Style','checkbox','string','Display processed data','Position',[550,350,200,20],'Callback',@update_fig);
 
-		%create sliders to control the height for DVC data
 		slider_xy=uicontrol('Style','slider','Position',[20,70,20,300],'min',1,'max',procdata.zmax,'Value',procdata.zheight,'Callback',@Slider_callback_xy);
         textbox_xy=uicontrol('Style','text','Position',[5,50,60,20],'String',num2str(field.POSZ(1,1,procdata.zheight)),'ToolTipString',sprintf('The currently viewed plane''s value'));
         textbox2_xy=uicontrol('Style','text','Position',[5,30,60,20],'String',sprintf('%d/%d',procdata.zheight,procdata.zmax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
         set(slider_xy,'SliderStep',[1 1]/(procdata.zmax-1));
+
         slider_xz=uicontrol('Style','slider','Position',[20,440,20,300],'min',1,'max',procdata.ymax,'Value',procdata.yheight,'Callback',@Slider_callback_xz);
         textbox_xz=uicontrol('Style','text','Position',[5,420,60,20],'String',num2str(field.POSY(procdata.yheight,1,1)),'ToolTipString',sprintf('The currently viewed plane''s value'));
         textbox2_xz=uicontrol('Style','text','Position',[5,400,60,20],'String',sprintf('%d/%d',procdata.yheight,procdata.ymax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
         set(slider_xz,'SliderStep',[1 1]/(procdata.ymax-1));
+
         slider_yz=uicontrol('Style','slider','Position',[410,440,20,300],'min',1,'max',procdata.xmax,'Value',procdata.xheight,'Callback',@Slider_callback_yz);
         textbox_yz=uicontrol('Style','text','Position',[395,420,60,20],'String',num2str(field.POSX(1,procdata.xheight,1)),'ToolTipString',sprintf('The currently viewed plane''s value'));
         textbox2_yz=uicontrol('Style','text','Position',[395,400,60,20],'String',sprintf('%d/%d',procdata.xheight,procdata.xmax),'ToolTipString',sprintf('The currently viewed plane out of how many panes exist in this direction'));
         set(slider_yz,'SliderStep',[1 1]/(procdata.xmax-1));
-
-        %create buttons to control what displacement data is displayed
-        button_x=uicontrol('Style','pushbutton','Position',[550,355,30,20],'string','UX','Callback',@button_x_callback);
-        button_y=uicontrol('Style','pushbutton','Position',[590,355,30,20],'string','UY','Callback',@button_y_callback);
-        button_z=uicontrol('Style','pushbutton','Position',[630,355,30,20],'string','UZ','Callback',@button_z_callback);
-        button_text=uicontrol('Style','text','string','Displaying UY','Position',[660,350,100,20]);
-        display_contour='uY';
 
         %create a locked version of the heights so that they can be readjusted in the case of cropping
         procdata.yheight_locked=procdata.yheight;
@@ -115,30 +102,6 @@ function display_operations(procdata_in)
         set(textbox2_yz,'string',sprintf('%d/%d',procdata.xheight,procdata.xmax));
 	    update_fig(hObject,eventdata,handles)
 	    guidata(hObject, handles);
-	end
-
-	function button_x_callback(hObject,eventdata,handles)
-		handles=guidata(hObject);
-		display_contour='uX';
-		set(button_text,'string','Displaying UX');
-		update_fig(hObject,eventdata,handles)
-		guidata(hObject, handles);
-	end
-
-	function button_y_callback(hObject,eventdata,handles)
-		handles=guidata(hObject);
-		display_contour='uY';
-		set(button_text,'string','Displaying UY');
-		update_fig(hObject,eventdata,handles)
-		guidata(hObject, handles);
-	end
-	
-	function button_z_callback(hObject,eventdata,handles)
-		handles=guidata(hObject);
-		display_contour='uZ';
-		set(button_text,'string','Displaying UZ');
-		update_fig(hObject,eventdata,handles)
-		guidata(hObject, handles);
 	end
 
 	% this function updates the figures to display the data with the selected options
@@ -192,7 +155,6 @@ function display_operations(procdata_in)
 			elseif procdata.zheight>z_size
 				procdata.zheight=z_size;				
 			end
-			%change slider values based on cropping applied
 			set(textbox2_xy,'string',sprintf('%d/%d',procdata.zheight,procdata.zmax))
 			set(textbox2_xz,'string',sprintf('%d/%d',procdata.yheight,procdata.ymax))
 			set(textbox2_yz,'string',sprintf('%d/%d',procdata.xheight,procdata.xmax))
@@ -233,7 +195,6 @@ function display_operations(procdata_in)
 			elseif procdata.zheight>z_size
 				procdata.zheight=z_size;				
 			end
-			%undo changes made to sliders for the case of cropping
 			set(textbox2_xy,'string',sprintf('%d/%d',procdata.zheight,procdata.zmax))
 			set(textbox2_xz,'string',sprintf('%d/%d',procdata.yheight,procdata.ymax))
 			set(textbox2_yz,'string',sprintf('%d/%d',procdata.xheight,procdata.xmax))
@@ -263,9 +224,9 @@ function display_operations(procdata_in)
 	        field.POSY_locked=field_backup.POSY_locked;
 	        field.POSZ_locked=field_backup.POSZ_locked;
 	    end
-	    display_on_axes(procdata,field,does,axes2,'PosX','PosZ',procdata.yheight,mask_check,display_contour)
-		display_on_axes(procdata,field,does,axes1,'PosX','PosY',procdata.zheight,mask_check,display_contour)
-		display_on_axes(procdata,field,does,axes3,'PosY','PosZ',procdata.xheight,mask_check,display_contour)
+	    display_on_axes(procdata,field,does,axes2,'PosX','PosZ',procdata.yheight,mask_check,'uY')
+		display_on_axes(procdata,field,does,axes1,'PosX','PosY',procdata.zheight,mask_check,'uY')
+		display_on_axes(procdata,field,does,axes3,'PosY','PosZ',procdata.xheight,mask_check,'uY')
 		
 		guidata(hObject, handles);
 	end

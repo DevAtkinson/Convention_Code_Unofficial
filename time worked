@@ -93,6 +93,12 @@ use todays save copy if want before switch Z on axes
 14/08/2017
 12:15 - 13:00	Fix issues with cropping DVC data in display_operations
 
+15/08/2017
+11:20 - 15:50	Found issue = if cropping height lies on one of the limits of the crop range then it will bug out
+				Found issue = if apply crop and want display all masks and one masks is outside of crop then bugs out.
+				Rewrote dipslay_operations so that it depends on a function display_on_axes which is more modular (simpler)
+18:10 - 19:00	Separate new display_operations function into individual codes
+
 Notes:
 rot90(fliplr(a),1)
 
@@ -108,6 +114,7 @@ all supporting functions in a folder (link to matlab so it knows where it is)
 seperate supporting functions into own scripts
 make example so people understand how to use code (and example how to do through script only)
 create example code to illustrate how to use backend and create masks manually and publish it. can put pictures into publishing
+Break up code into smaller modular pieces of code that are more logical
 
 
 
